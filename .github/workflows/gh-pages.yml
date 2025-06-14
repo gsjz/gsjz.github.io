@@ -30,5 +30,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./site
-          # 如果你的仓库名不是 <user>.github.io，就打开下一行：
-          # publish_branch: gh-pages
