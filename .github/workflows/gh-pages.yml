@@ -6,39 +6,43 @@ on:
       - main
 
 permissions:
-  contents: read        # 读取仓库内容
-  pages: write          # 部署 Pages
-  id-token: write       # 支持 OIDC（必要）
+  pages: write       # 允许写入 Pages
+  id-token: write    # 支持 OIDC
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
+    outputs:
+      artifact-sha: ${{ steps.upload.outputs.artifact-sha }}
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Install dependencies
+      - name: Install deps
         run: |
-          python -m pip install --upgrade pip
+          pip install --upgrade pip
           pip install mkdocs-material
 
-      - name: Build the site
+      - name: Build site
         run: mkdocs build --strict
 
-      - name: Upload artifact for GitHub Pages
+      - name: Upload Pages artifact
+        id: upload
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./site
 
   deploy:
-    needs: build-deploy
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy to Pages
         uses: actions/deploy-pages@v1
+        with:
+          artifact-sha: ${{ needs.build.outputs.artifact-sha }}
