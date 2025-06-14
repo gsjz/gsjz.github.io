@@ -1,7 +1,7 @@
 site_name: 我的 MkDocs Material 站点
 site_description: "基于 MkDocs Material 的个人文档网站"
 site_author: 你的名字
-repo_url: https://github.com/你的用户名/你的仓库名
+repo_url: https://github.com/gsjz/gsjz.github.io
 theme:
   name: material
   palette:
@@ -13,7 +13,7 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/你的用户名
+      link: https://github.com/gsjz
 nav:
   - 首页: index.md
   - 指南:
