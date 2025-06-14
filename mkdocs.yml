@@ -7,7 +7,8 @@ site_description: 高书捷的主页
 
 # [Navigtion]
 nav:
-  
+  - XCPC
+    - XCPC/笛卡尔树.md
 
 # [UI]
 # [top]
