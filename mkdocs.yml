@@ -1,6 +1,6 @@
-site_name: 我的 MkDocs Material 站点
-site_description: "基于 MkDocs Material 的个人文档网站"
-site_author: 你的名字
+site_name: gsj's page
+site_description: "Sergio Gao's homepage"
+site_author: SergioGao 高书捷
 repo_url: https://github.com/gsjz/gsjz.github.io
 theme:
   name: material
