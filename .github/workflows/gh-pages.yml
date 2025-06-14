@@ -1,3 +1,4 @@
+
 name: Deploy MkDocs to GitHub Pages
 
 on:
@@ -6,17 +7,18 @@ on:
       - main
 
 permissions:
-  pages: write       # 允许写入 Pages
-  id-token: write    # 支持 OIDC
+  contents: read       # 读取仓库文件
+  pages: write         # 发布到 GitHub Pages
+  id-token: write      # 支持 OIDC 部署
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      artifact-sha: ${{ steps.upload.outputs.artifact-sha }}
+      artifact-sha: ${{ steps.upload-pages.outputs.artifact-sha }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       - name: Setup Python
@@ -24,16 +26,16 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install mkdocs-material
 
-      - name: Build site
+      - name: Build the site
         run: mkdocs build --strict
 
       - name: Upload Pages artifact
-        id: upload
+        id: upload-pages
         uses: actions/upload-pages-artifact@v1
         with:
           path: ./site
@@ -41,8 +43,9 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
     steps:
-      - name: Deploy to Pages
+      - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v1
         with:
           artifact-sha: ${{ needs.build.outputs.artifact-sha }}
