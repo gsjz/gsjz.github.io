@@ -15,9 +15,14 @@ nav:
     - 分类题解:
       - XCPC/分类题解/笛卡尔树.md
       - XCPC/分类题解/凸优化相关.md
-    
+      - XCPC/分类题解/网络流.md
+      - XCPC/分类题解/特殊 MST.md
+      - XCPC/分类题解/树上计数.md
+      - XCPC/分类题解/Tarjan 相关.md
+      - XCPC/分类题解/多项式相关.md
+      - XCPC/分类题解/Min-max 容斥.md
     - 普通题解:
-      - XCPC/普通题解/CF.md
+      - XCPC/普通题解/CF日常补题.md
 
     - 模板与课件:
       - XCPC/模板与课件/参赛模板.md
@@ -155,6 +160,8 @@ markdown_extensions:
   # [Markdown footnote 语法支持]
   # https://squidfunk.github.io/mkdocs-material/reference/footnotes/
   - footnotes
+  - pymdownx.tabbed:
+      alternate_style: true
 
 extra_javascript:
   # [数学公式支持]
