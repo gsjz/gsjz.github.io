@@ -3,17 +3,20 @@
 [Problem - 2033F - Codeforces](https://codeforces.com/problemset/problem/2033/F)
 [Pisano period - Wikipedia](https://en.wikipedia.org/wiki/Pisano_period)
 
+
 ### primary analysis
 
 ??? note "the validity to consider period $\pi$"
     Another probable case is, before it enters the period, there's a path with non-zero distance. But this case can be proved impossible.
     The problem is equivalent to the order of the matrix
+    
     $$
     \begin{bmatrix}
-    1&1\\
+    1&1\\ 
     1&0
     \end{bmatrix}
     $$
+
     in the $\text{GL}_2(\mathbb{Z}_n)$, due to the initial value fits the recursion matrix coincidentally. Because of $|\det|=1$ perceives when take powers, we can prove that the identity matrix is unique.
     Denote the order as $\pi(n)$.
 
