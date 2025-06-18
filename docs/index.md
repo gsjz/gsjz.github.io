@@ -4,9 +4,6 @@
 
 我现在就读于杭州电子科技大学计算机科学与技术专业。
 
-
-
-
 ---
 
 下面是一些简单网站功能测试
@@ -60,6 +57,8 @@
 
 ![text](https://cdn.jsdelivr.net/gh/Wallbreaker5th/vuqa/vuqa.png)
 
+<img src="https://raw.githubusercontent.com/gsjz/my-pic-bed/main/20250618183540704.jpg"/ style = "width:50%" > 
+
 
 <div style="height:800px;">
   <iframe
@@ -70,3 +69,5 @@
   >
   </iframe>
 </div>
+
+
