@@ -57,8 +57,12 @@
 
 ![text](https://cdn.jsdelivr.net/gh/Wallbreaker5th/vuqa/vuqa.png)
 
+
 <img src="https://raw.githubusercontent.com/gsjz/my-pic-bed/main/20250618183540704.jpg"/ style = "width:50%" > 
 
+<div style="height:800px;">
+    <iframe src = "XCPC/分类题解/中国剩余定理" width="100%" height="100%" ></iframe>
+</div>
 
 <div style="height:800px;">
   <iframe
