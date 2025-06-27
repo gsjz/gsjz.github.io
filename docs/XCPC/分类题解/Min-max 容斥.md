@@ -43,6 +43,7 @@ max 转 min 后，集**齐** k 种（全集 $S$ 获得时间第 $k$ 晚）变成
 可以 max 转 min，也可以不转直接做，主要是因为这题的数学部分中，不像前面那几题把 $T$ 划分成几类。不同的 $T$ 其实没啥共同特征，只能穷举后从头模拟。
 
 min 版本
+
 $$
 f[T][x] = 
 \begin{cases}
@@ -51,7 +52,9 @@ f[T][x] =
 1 + \frac{1}{\deg}\sum_{j\in e(x)} f[T][j] & \text{otherwise}
 \end{cases}
 $$
+
 max 版本
+
 $$
 g[T][x] = 
 \begin{cases}
