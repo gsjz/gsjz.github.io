@@ -1,6 +1,6 @@
 # [Info]
 # 左上角标题
-site_name: gsj's page
+site_name: Sergio Gao's Page
 site_url: https://gsjz.github.io
 site_author: SergioGao
 site_description: 高书捷的主页
@@ -50,6 +50,10 @@ theme:
   name: material
   # [切换日间模式和夜间模式]
   # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#color-palette-toggle
+  
+  logo: images/GClef.svg
+  favicon: images/GClef_black.svg
+  
   palette:
     # 日间模式
     - scheme: default
@@ -121,6 +125,7 @@ extra:
   # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#social-links
   # 搜索图标：https://squidfunk.github.io/mkdocs-material/reference/icons-emojis/#search
   # name 会在鼠标悬浮时提示
+    
   social: # icons
     - name: GitHub
       icon: fontawesome/brands/github
