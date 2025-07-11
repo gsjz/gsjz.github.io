@@ -8,7 +8,8 @@ site_description: 高书捷的主页
 # [Navigtion]
 nav:
   - XCPC:
-    - 我的参赛与思索:
+    - XCPC/index.md
+    - 我的参赛与思索: 
       - XCPC/我的参赛与思索/我的奖项.md
       - XCPC/我的参赛与思索/24 赛季 VP.md
     - 分类题解:
@@ -33,6 +34,7 @@ nav:
       - XCPC/模板与课件/参赛模板.md
       - XCPC/模板与课件/Min-Max 容斥课件.md
   - 本科学习:
+    - 本科学习/index.md
     - 考研内容:
       - 数学:
         - 本科学习/考研内容/数学/高数期末.md
@@ -59,7 +61,7 @@ theme:
     - scheme: default
       # 主颜色
       # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#primary-color
-      primary: indigo
+      primary: black
       # 链接等可交互元件的高亮色
       # https://squidfunk.github.io/mkdocs-material/setup/changing-the-colors/#accent-color
       accent: orange
@@ -70,7 +72,7 @@ theme:
         name: 切换至夜间模式
     # 夜间模式
     - scheme: slate
-      primary: indigo
+      primary: black
       accent: orange
       toggle:
         icon: material/weather-sunny
@@ -87,34 +89,34 @@ theme:
     - navigation.indexes
     # 打开 Tab 时左侧目录全部展开
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#navigation-expansion
-    - navigation.expand
+    # - navigation.expand
     # 搜索输入一些字母时推荐补全整个单词
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search/#search-suggestions
     - search.suggest
     # 搜索的关键词文章加入高亮
     # https://squidfunk.github.io/mkdocs-material/setup/setting-up-site-search/#search-highlighting
-    - search.highlight
+    # - search.highlight
     # 可以通过按钮复制代码
     # https://squidfunk.github.io/mkdocs-material/reference/code-blocks/#code-copy-button
     - content.code.copy
     # [点击按钮跳转至 GitHub 修改 Markdown 源文件]
     # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
-    - content.action.edit
+    # - content.action.edit
     - navigation.tracking # 激活深度导航
 
   language: zh # 一些提示性的文字会变成中文
   icon:
     # [添加 GitHub 仓库]
     # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#repository-icon
-    repo: fontawesome/brands/github
+    # repo: fontawesome/brands/github
 # [点击按钮跳转至 GitHub 修改 Markdown 源文件]
 # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
-edit_uri: edit/main/docs/
+# edit_uri: edit/main/docs/
 # [top-right corner]
 # [添加 GitHub 仓库]
 # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/
-repo_url: https://github.com/gsjz/gsjz.github.io
-repo_name: gsjz.github.io
+# repo_url: https://github.com/gsjz/gsjz.github.io
+# repo_name: gsjz.github.io
 # [bottom-left corner]
 # [版权说明]
 # https://squidfunk.github.io/mkdocs-material/setup/setting-up-the-footer/#copyright-notice
@@ -145,6 +147,7 @@ plugins:
   # https://squidfunk.github.io/mkdocs-material/setup/setting-up-tags/
   # https://squidfunk.github.io/mkdocs-material/plugins/tags/#meta.tags
   - tags
+  - meta
 markdown_extensions:
   # [数学公式支持]
   # https://squidfunk.github.io/mkdocs-material/reference/math/#katex
