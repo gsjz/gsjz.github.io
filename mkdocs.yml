@@ -9,9 +9,6 @@ site_description: 高书捷的主页
 nav:
   - XCPC:
     - XCPC/index.md
-    - 我的参赛与思索: 
-      - XCPC/我的参赛与思索/我的奖项.md
-      - XCPC/我的参赛与思索/24 赛季 VP.md
     - 分类题解:
       - XCPC/分类题解/笛卡尔树.md
       - XCPC/分类题解/凸优化相关.md
