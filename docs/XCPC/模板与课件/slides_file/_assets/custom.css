@@ -1,0 +1,7 @@
+.reveal .slides {
+  text-align: left;
+}
+
+.reveal h1, .reveal h2, .reveal h3, .reveal p, .reveal ul, .reveal ol {
+  text-align: left !important;
+}
