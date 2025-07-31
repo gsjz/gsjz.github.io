@@ -29,7 +29,7 @@ nav:
     - 模板与课件:
       - XCPC/模板与课件/参赛模板.md
       - XCPC/模板与课件/Min-Max 容斥课件.md
-      - 功能测试: XCPC/模板与课件/slides_file/测试文件.html
+      - 功能测试: XCPC/模板与课件/dist/test.html
   - 本科学习:
     - 本科学习/index.md
     - 考研内容:
