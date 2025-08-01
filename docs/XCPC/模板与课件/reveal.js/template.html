@@ -22,6 +22,10 @@
             Write something here.
         </section>
 
+
+
+
+
         <!-- The following section should be delete after finished the project -->
         <section>
           <section>
@@ -88,9 +92,50 @@
           </section>
 
         </section>
-      </div>
-    </div>  
 
+        <section>
+          <section>
+            <h3>reveal.js-d3 测试</h3>
+            <div class="fig-container col-50" 
+              data-file="src/d3-fig/binary-tree-test.html"
+              style="
+              position: relative;
+              top: 50%;
+              left: 65%;
+              transform: translate(-50%, 0%);
+            ">     
+            </div>
+          </section>
+          <section>
+            <a href = "https://github.com/gcalmettes/reveal.js-d3" target = "_blank" title = "Github 链接">来自</a>
+            <br/>
+            <p>
+              this example seems a bit heavy, so it's defautly not working.
+            </p>
+            <!-- <div class="fig-container col-50" 
+              data-file="src/d3-fig/modular-multiplication.html"
+              style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, 10%);
+            ">     
+            </div> -->
+          </section>
+        </section>
+
+      </div>
+    </div>
+    <!-- 用户文件截止 -->
+
+
+
+
+
+
+
+
+    
     <!-- 主库 -->
     <script src="dist/reveal.js"></script>
 
@@ -104,6 +149,8 @@
     <!-- <script src="plugin/menu/menu.js"></script> -->
     <script src="plugin/math/math.js"></script>
     <!-- <script src="plugin/autoanimate/autoanimate.js"></script> -->
+
+    <script src="plugin/reveald3.js"></script>
 
     <!-- 初始化 -->
     <script>
@@ -123,6 +170,7 @@
           // RevealMenu,
           RevealMath,
           // RevealAutoAnimate
+          Reveald3,
         ]
       });
     </script>

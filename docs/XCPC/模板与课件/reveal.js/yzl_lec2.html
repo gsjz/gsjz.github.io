@@ -45,6 +45,76 @@
 
         </section>
 
+
+        <section>
+          <section>
+            <h2>映射视角下的计数原理</h2>
+          </section>
+
+          <section>
+            <h3>普通映射视角：分类计数</h3>
+            <p>
+              普通映射视角下，分类计数可以看成是构造了一个 组合对象 到 类别 的映射。
+              我们要给一个给定的组合对象，规定它的唯一特征，从而符合映射的要求。
+            </p>
+            <p>
+              这样，计算组合对象的数量，等价于遍历所有类别，
+              针对一个特定的类别考虑有多少个组合对象指向它。
+            </p>
+          </section>
+
+          <section>
+            <h3>双射视角：等价转化</h3>
+            <p>
+              双射视角下，两个集合大小相等。
+              我们需要找到两个集合之间的一一对应。
+              从而数出一边，就能直到另一边。
+            </p>
+            <p class="fragment fade-in">
+              等等，能不能两种视角一起工作？
+            </p>
+          </section>
+
+          <section>
+            <h3>例子：数小朋友的数量</h3>
+            
+            <p>有一些小朋友，它们当然有自己的性别。它们各自有一个书包，书包有一种颜色。</p>            
+            
+            <p class="fragment fade-in">
+              第一种思路：我可以考虑 小朋友 到 性别 的映射。
+              一个小朋友不会有两种性别，所以这的确是一个映射。
+              我在性别端进行计数。数出每个性别的小朋友的数量，再把这些数量加起来。
+            </p>
+          </section>
+          <section>
+
+            <p class="fragment fade-in">
+              第二种思路：小朋友 和 书包 之间是一一对应的关系。它们的总数相同，所以我把书包给数出来即可。
+            </p>
+
+            <p class="fragment fade-in">
+              第三种思路：我是不是可以再把两种思路综合一下？
+              我再考虑书包的分类计数，按照颜色分类，分别数，加起来，从而数出书包总数。
+            </p>
+            
+          </section>
+          <section>
+            <h3>技术补充：一种验证双射的方法</h3>
+            在先前的语境下，这里要补充的技术是：
+            <li class="fragment fade-in">如果小朋友 $a$ 的书包 $b$ 的主人是小朋友 $a$</li>
+            <li class="fragment fade-in">如果书包 $b$ 的主人 $a$ 的书包是小朋友 $b$</li>
+            那么这就构造出了一个双射。
+            <p class="fragment fade-in">
+            原理在于，两个方向的单射，即为双射。
+            </p>
+            <p class="fragment fade-in">
+            实际上，这里暗示了辅助映射的存在性，即书包回到主人的映射。<br/>
+            如果说能找到这样的一个逆映射，实际上就能说明这是一个双射。
+            </p>
+          </section>
+          
+        </section>
+
         <section>
           <section>
 <h2> 一些大小等于 Catalan 数的集合 </h2>
@@ -68,9 +138,8 @@
         <td>Dyck 路径</td><td>UUDDUD</td><td>5</td><td>计数形式最自然</td>
       </tr>
       <tr class="fragment">
-        <td>二叉树</td><td>一个图</td><td>5</td><td>递归形式最自然</td>
+        <td>二叉树</td><td>见下方</td><td>5</td><td>递归形式最自然</td>
       </tr>
-      <!-- 可继续添加 -->
     </tbody>
   </table>
 </div>
@@ -78,11 +147,26 @@
           </section>
           <section>
 
-            todo
+            <div class="fig-container col-50" 
+              data-file="src/d3-fig/bracket-binary-tree.html"
+              style="
+              position: relative;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, 0%);
+            ">     
+            </div>
 
           </section>
         </section>
 
+
+        <section>
+          <section>
+            <h2>Dyck 路径计数</h2>
+            todo
+          </section>
+        </section>
 
         <!-- The following section should be delete after finished the project -->
         <section>
@@ -167,6 +251,7 @@
     <!-- <script src="plugin/menu/menu.js"></script> -->
     <script src="plugin/math/math.js"></script>
     <!-- <script src="plugin/autoanimate/autoanimate.js"></script> -->
+    <script src="plugin/reveald3.js"></script>
 
     <!-- 初始化 -->
     <script>
@@ -186,6 +271,7 @@
           // RevealMenu,
           RevealMath,
           // RevealAutoAnimate
+          Reveald3,
         ]
       });
     </script>
