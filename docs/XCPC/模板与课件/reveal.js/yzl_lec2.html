@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>yzl_lec2</title>
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/white.css">
+    <link rel="stylesheet" href="plugin/highlight/monokai.css">
+    <style>
+      .reveal .slides section {
+        text-align: left;
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
+    </style>
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h1>yzl_lec2</h1>
+          date: 25.08.03
+        </section>
+
+        <section>
+
+<h2>课程大纲</h2>
+
+<p class="fragment fade-in">
+（1）从双射法的角度，初步介绍 Catalan 数相关的知识。
+</p>
+
+<p class="fragment fade-in">
+（2）复习一下线性筛素数，顺便告知 $\mu$ 的计算方式，现场实现一下。为以后课讲和式变换作铺垫。
+</p>
+
+<p class="fragment fade-in">
+（3）二项式定理。上节课提到学校没学过。 <br/>
+</p>
+
+<p class="fragment fade-in">
+（4）顺便讲一些小知识。
+</p>
+
+        </section>
+
+        <section>
+          <section>
+<h2> 一些大小等于 Catalan 数的集合 </h2>
+
+<p>下表列出了一些（大小为 $n$ 的结构）组成的集合，
+  它们的元素个数为第 $n</code>$ 个 Catalan 数 $C_n$：</p>
+
+<div style="display: flex; justify-content: center;">
+<div style = "transform: scale(0.8); transform-origin: top center; width: 150%;">
+  <table style="width: 100%;">
+    <thead>
+      <tr>
+        <th>类型</th><th>示例</th><th>$C_3$</th> <th>特点</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="fragment">
+        <td>合法括号序列</td><td>(())()</td><td>5</td><td style = "white-space: nowrap;">和合法出入栈序列的对应最自然</td>
+      </tr>
+      <tr class="fragment">
+        <td>Dyck 路径</td><td>UUDDUD</td><td>5</td><td>计数形式最自然</td>
+      </tr>
+      <tr class="fragment">
+        <td>二叉树</td><td>一个图</td><td>5</td><td>递归形式最自然</td>
+      </tr>
+      <!-- 可继续添加 -->
+    </tbody>
+  </table>
+</div>
+</div>
+          </section>
+          <section>
+
+            todo
+
+          </section>
+        </section>
+
+
+        <!-- The following section should be delete after finished the project -->
+        <section>
+          <section>
+            
+            <h2>功能测试</h2>
+            
+            由于 reveal.js 的 markdown 功能和 latex 之间存在 bug，因此尝试采用 html 语法来写。<br/>
+            
+            此外，mkdocs 也存在不能引用 .md 的特性。这篇文档仅作为调试用例。
+            这里我是将后缀修改为 .md2 来实现的。 <br/>
+            
+            这页下方是直接 html 里写的，此页之后都是直接调用的外部 .md 文件。<br/>
+         
+          </section>
+          <section>
+            <h3>$\LaTeX$ 测试</h3>
+            $$ 
+            \begin{aligned}
+            &x \\
+            \{&x\} 
+            \end{aligned}
+            $$            
+          </section>
+          <section>
+            <h3>代码测试</h3>
+            
+<pre><code data-trim class="language-python">
+>>> import antigravity
+>>> print(b"\x01\x02\x03")
+>>> a = 2
+</code></pre>            
+
+          </section>
+          <section>
+            <h3>逐步代码测试</h3>
+
+<pre><code class="language-cpp" data-line-numbers="3|7|5-6">void solve()
+{
+    auto fib = [&](this auto self, int n)
+    { 
+        if(n == 0) return 0;
+        if(n == 1) return 1;
+        return self(n-2) + self(n-1);
+    };
+    for(int i=0; i<=10; i++)
+    {
+        cout&lt;&lt;fib(i)&lt;&lt;"\n";
+    }
+    return;
+}
+</code>
+</pre>            
+          </section>
+          <section>
+            <li class="fragment fade-in">淡入</li>
+            <li class="fragment fade-out">淡出</li>
+            <li class="fragment fade-up">向上淡入</li>
+            <li class="fragment fade-down">向下淡入</li>
+            <li class="fragment fade-left">向左淡入</li>
+            <li class="fragment fade-right">向右淡入</li>
+            <li class="fragment shrink">缩小</li>
+            <li class="fragment grow">放大</li>
+            <li class="fragment roll-in">滚入</li>
+            <li class="fragment highlight-red">高亮红色</li>
+          </section>
+
+        </section>
+      </div>
+    </div>  
+
+    <!-- 主库 -->
+    <script src="dist/reveal.js"></script>
+
+    <!-- 插件 -->
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/search/search.js"></script>
+    <!-- <script src="plugin/fullscreen/fullscreen.js"></script> -->
+    <!-- <script src="plugin/menu/menu.js"></script> -->
+    <script src="plugin/math/math.js"></script>
+    <!-- <script src="plugin/autoanimate/autoanimate.js"></script> -->
+
+    <!-- 初始化 -->
+    <script>
+      Reveal.initialize({
+        hash: true,
+        slideNumber: true,
+        controls: true,
+        progress: true,
+        center: true,
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealNotes,
+          RevealZoom,
+          RevealSearch,
+          // RevealFullscreen,
+          // RevealMenu,
+          RevealMath,
+          // RevealAutoAnimate
+        ]
+      });
+    </script>
+  </body>
+</html>
