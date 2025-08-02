@@ -79,7 +79,7 @@
   <span id="error"></span>
 </div>
 
-<svg width="700" height="700" id="dyckSVG" aria-label="Dyck路径可视化图"></svg>
+<svg width="500" height="500" id="dyckSVG" aria-label="Dyck路径可视化图"></svg>
 
 <script>
   // 缓存状态
@@ -117,9 +117,9 @@
     lastFirstBelow = firstBelow;
 
     // 固定坐标范围和尺寸
-    const width = 700, height = 700, margin = 50;
-    const xDomain = [0, 10];
-    const yDomain = [-10, 10];
+    const width = 500, height = 500, margin = 50;
+    const xDomain = [0, 12];
+    const yDomain = [-6, 6];
 
     const xScale = d3.scaleLinear().domain(xDomain).range([margin, width - margin]);
     const yScale = d3.scaleLinear().domain(yDomain).range([height - margin, margin]);

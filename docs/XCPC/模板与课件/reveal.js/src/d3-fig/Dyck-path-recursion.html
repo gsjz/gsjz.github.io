@@ -29,7 +29,7 @@
     <button onclick="draw()">绘制</button>
     <span id="error"></span>
   </div>
-  <svg id="chart" width="700" height="700" aria-label="Dyck路径可视化图"></svg>
+  <svg id="chart" width="500" height="500" aria-label="Dyck路径可视化图"></svg>
 
   <script>
     function draw() {
@@ -38,7 +38,7 @@
       const svg = d3.select('#chart'); svg.selectAll('*').remove();
 
       const width = +svg.attr('width'), height = +svg.attr('height'), margin = 50;
-      const xDomain = [0,10], yDomain=[-10,10];
+      const xDomain = [0,12], yDomain=[-6,6];
       const xScale = d3.scaleLinear().domain(xDomain).range([margin, width-margin]);
       const yScale = d3.scaleLinear().domain(yDomain).range([height-margin, margin]);
 
