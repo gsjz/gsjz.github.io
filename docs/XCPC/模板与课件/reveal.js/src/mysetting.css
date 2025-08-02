@@ -11,3 +11,11 @@ padding: 0.1em 0.4em; /* ⬅️ 上下更窄，左右不变 */
 border-radius: 4px;
 font-weight: bold;
 }
+.reveal blockquote {
+  max-width: 90%;  /* 你可以调大，比如 100% 或者具体像素 */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1em 2em; /* 根据需要调整内边距 */
+  font-size: 0.8em; /* 放大一点字体，非必须 */
+  border-left: 5px solid #ccc; /* 可调整左边的引号线样式 */
+}
