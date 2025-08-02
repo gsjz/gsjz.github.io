@@ -3,17 +3,11 @@
   <head>
     <meta charset="utf-8">
     <title>yzl_lec2</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="dist/reveal.css">
     <link rel="stylesheet" href="dist/theme/white.css">
-    <link rel="stylesheet" href="plugin/highlight/monokai.css">
-    <style>
-      .reveal .slides section {
-        text-align: left;
-        justify-content: flex-start;
-        align-items: flex-start;
-      }
-    </style>
-
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css">
+    <link rel="stylesheet" href="src/mysetting.css">
   </head>
   <body>
     <div class="reveal">
@@ -68,10 +62,10 @@
             <p>
               双射视角下，两个集合大小相等。
               我们需要找到两个集合之间的一一对应。
-              从而数出一边，就能直到另一边。
+              从而数出一边，就能直接知道另一边。
             </p>
             <p class="fragment fade-in">
-              等等，能不能两种视角一起工作？
+              两种视角可以叠加使用。就像 $a=b$ 和 $b=c$ 能推出 $a=c$ 一样。
             </p>
           </section>
 
@@ -105,7 +99,7 @@
             <li class="fragment fade-in">如果书包 $b$ 的主人 $a$ 的书包是小朋友 $b$</li>
             那么这就构造出了一个双射。
             <p class="fragment fade-in">
-            原理在于，两个方向的单射，即为双射。
+            原理在于，如果一个单射反向连边后仍为映射，或者说有两个方向的单射，即为双射。
             </p>
             <p class="fragment fade-in">
             实际上，这里暗示了辅助映射的存在性，即书包回到主人的映射。<br/>
@@ -164,47 +158,223 @@
         <section>
           <section>
             <h2>Dyck 路径计数</h2>
-            todo
+            <p>
+              Dyck 路径的定义，是在长度为 $2n$ 的 UD 序列上：
+              <li class="fragment">
+                要求有 $n$ 个 U：自然，这些 U 位置确认好后 D 就能确认了。
+              </li>
+              <li class = "fragment">
+                符合限制：任何前缀，U 的数量不能少于 D 的数量。
+              </li>
+              分别思考这样的问题：
+              <li class = "fragment">
+                符合第一个要求的序列有多少个？
+              </li>
+              <li class="fragment">
+                符合第一个要求但不符合第二个要求的序列有多少个？
+              </li>
+            </p>
+          </section>
+          <section>
+            <div class="fig-container col-50" 
+              data-file="src/d3-fig/Dyck-path-bijection.html"
+              style="
+              position: relative;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -5%);
+            ">     
+            </div>
+          </section>
+          <section>
+            <h3>递归形式</h3>
+
+            <p class="fragment">
+              实际上 Catalan 数还满足如下递归式
+
+              $$
+              C_n = \sum\limits_{i=1}^{n} C_{i-1}\cdot C_{n-i}
+              $$
+            </p>
+            <p>
+              <li class="fragment">关键在于，每个合法路径，第一位总是 U；</li>
+              <li class="fragment">并且总存在第一个归零点，这位总是 D；</li>
+              <li class="fragment">上述两个 UD 是配对的。假设第一个归零点配对了 $i$ 组 UD。</li>
+              <li class="fragment">它们内部是一个 $i-1$ 的子问题</li>
+              <li class="fragment">第一个归零点之后是一个 $n-i$ 的子问题</li>
+            </p>
+            
+
+          </section>
+          <section>
+            <div class="fig-container col-50" 
+              data-file="src/d3-fig/Dyck-path-recursion.html"
+              style="
+              position: relative;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -5%);
+            ">     
+            </div>
           </section>
         </section>
 
-        <!-- The following section should be delete after finished the project -->
         <section>
           <section>
+            <h2>线性筛复习</h2>
+
+            <p class="fragment">筛欧拉函数，回忆计算公式。</p>
             
-            <h2>功能测试</h2>
-            
-            由于 reveal.js 的 markdown 功能和 latex 之间存在 bug，因此尝试采用 html 语法来写。<br/>
-            
-            此外，mkdocs 也存在不能引用 .md 的特性。这篇文档仅作为调试用例。
-            这里我是将后缀修改为 .md2 来实现的。 <br/>
-            
-            这页下方是直接 html 里写的，此页之后都是直接调用的外部 .md 文件。<br/>
-         
-          </section>
-          <section>
-            <h3>$\LaTeX$ 测试</h3>
-            $$ 
-            \begin{aligned}
-            &x \\
-            \{&x\} 
-            \end{aligned}
-            $$            
-          </section>
-          <section>
-            <h3>代码测试</h3>
-            
-<pre><code data-trim class="language-python">
->>> import antigravity
->>> print(b"\x01\x02\x03")
->>> a = 2
-</code></pre>            
+            <p class="fragment">快速求出 $\varphi(i),i=2,3,4,\cdots,n$。</p>
+
+            <p class="fragment">其实就是要控制，对于一个素因子 $p$，恰好让它乘一次 $\frac{p-1}{p}$。</p>
+
+            <p class="fragment">欧拉筛中，合数 $x$，记它的最小素因子是 $p_{\min}$，$x$ 唯一一次被访问（被筛），是在外层循环访问到 $x/p_{\min}$，内层循环循到  $p_{\min}$（由于最小性，之前不会被 break）。</p>
 
           </section>
           <section>
-            <h3>逐步代码测试</h3>
+            在欧拉筛的基础上，对于素数，点值是平凡的；对于合数 $x$，由于外层从小到大，$\varphi(x/p_{\min})$ 已知，求 $\varphi(x)$：
 
-<pre><code class="language-cpp" data-line-numbers="3|7|5-6">void solve()
+            如果 $x/p_{\min}$ 不是 $p_{\min}$ 的倍数，考虑给下式子右边扩充一个 $p_{\min}$ 和一个 $1-\frac{1}{p_{\min}}$，乘一下。
+
+            $$
+            \varphi(\frac{x}{p_{\min}}) = \frac{x}{p_{\min}} \cdot \prod_{p|\frac{x}{p_{\min}}} (1-\frac{1}{p})
+            $$
+
+          </section>
+          <section>
+
+            反之，如果 $x/p_{\min}$ 是 $p_{\min}$ 的倍数，则求积下标中
+
+            $$
+            p|\frac{x}{p_{\min}}
+            $$
+            会枚举到素数 $p_{\min}$。所以只需要补充一个 $p_{\min}$。
+            顺便一提，欧拉筛也会正好在这之后，结束掉内层循环。
+
+          </section>
+          <section>
+            <h3>莫比乌斯函数 $\mu(x)$</h3>
+
+            给出 $\mu(x)$ 的计算公式
+
+            $$
+            \mu(x) = 
+            \begin{cases}
+            1 & \text{当 } x = 1 \\
+            0 & \text{当 } x \text{ 含有平方因子}\\
+              &\text{（即存在素数 } p \text{ 满足 } p^2 \mid x） \\
+            (-1)^k & \text{当 } x \text{ 是 } k \text{ 个不同素数的乘积}
+            \end{cases}
+            $$
+
+            <p>
+              怎么在之前的基础上，设计算法，快速求出 $\mu(i),i=2,3,4,\cdots,n$。
+            </p>
+
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>二项式定理</h2>
+
+            $$
+            (a+b)^n = \sum\limits_{i=0}^{n} \binom{n}{i} a^{i} b^{n-i}
+            $$
+
+            <p class="fragment fade-in">
+              应用：$n$ 个数，二进制枚举子集的复杂度是
+
+              $$
+              \sum\limits_{i=0}^{n}\binom{n}{i}
+              $$
+
+              怎么计算？
+            </p>
+
+          </section>
+
+          <section>
+            在上面问题的基础上，如果我还要用 $2^i$ 的时间遍历每个大小为 $i$ 的集合
+
+            $$
+            \sum\limits_{i=0}^{n}\binom{n}{i}2^i
+            $$
+
+            怎么计算？
+          </section>            
+
+        </section>
+
+        <section>
+  <section>
+    <h2>小知识：C++ 标准</h2>
+    <ul>
+      <li>C++ 是不断演进的语言，有不同的“标准版本”</li>
+      <li>标准委员会每几年发布一次新标准，增加新语法、新库等。</li>
+      <li>常见的有：C++98、C++03、C++11、C++14、C++17、C++20、C++23。</li>
+      <li class="fragment">这个数字的意义其实就是发布的年份。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>CCF 的比赛规范</h2>
+    
+    <blockquote class = "fragment">
+      <p>根据NOI活动的发展形势，NOI科学委员会特对NOI系列活动（包括CSP-J/S在内）中编程语言的使用做如下补充说明：</p>
+      <p>1、除题面有明确要求外，C++程序编译默认采用的语言标准为C++14；</p>
+      <p>...</p>
+      
+      <a href="https://www.noi.cn/xw/2021-09-01/735729.shtml">
+        <footer>— 2021年9月1日</footer>
+      </a>
+    </blockquote>
+
+    <p class="fragment">在此之前，只有 2011 年发了一个规范，显然没有跟进当年发布的 C++11。</p>
+ 
+  </section>
+
+  <section>
+    <h3>IDE（如 Dev-C++）的“一键运行”原理</h3>
+    <ul>
+      <li>IDE 会在后台调用 <code>g++</code>，自动编译 + 运行</li>
+      <li>等价于命令：
+        
+        <pre><code data-trim data-noescape><script type="text/template">
+        g++ main.cpp -o main.exe && main.exe
+        </script></code></pre>
+
+      </li>
+      <li>本质上和命令行一样，只是帮你生成了命令</li>
+    </ul>
+  </section>
+
+  <section>
+    <h3>如何在命令行指定 C++ 标准</h3>
+    <p>使用 <code>-std=c++XX</code> 参数，例如：</p>
+
+      <pre><code data-trim data-noescape><script type="text/template">
+      g++ main.cpp -std=c++23 -o main.exe
+      </script></code></pre>
+      
+    <p>常见版本：</p>
+    <ul>
+      <li>
+        <code>-std=c++11</code>：支持 lambda、auto
+      </li>
+      <li><code>-std=c++17</code>：支持结构化绑定</li>
+      <li><code>-std=c++23</code>：支持 auto 自递归</li>
+    </ul>
+  </section>
+
+  <section>
+    <h3>C++23 新特性：auto 函数可递归</h3>
+    <p>在旧版本中，<code>auto</code> 函数不能递归调用自己</p>
+    <p>但 C++23 改进了规则，支持如下代码：</p>
+
+    <pre><code data-trim data-noescape class="language-cpp" data-line-numbers="3|7|5-6"><script type="text/template">
+void solve()
 {
     auto fib = [&](this auto self, int n)
     { 
@@ -214,27 +384,16 @@
     };
     for(int i=0; i<=10; i++)
     {
-        cout&lt;&lt;fib(i)&lt;&lt;"\n";
+        cout<<fib(i)<<"\n";
     }
     return;
 }
-</code>
-</pre>            
-          </section>
-          <section>
-            <li class="fragment fade-in">淡入</li>
-            <li class="fragment fade-out">淡出</li>
-            <li class="fragment fade-up">向上淡入</li>
-            <li class="fragment fade-down">向下淡入</li>
-            <li class="fragment fade-left">向左淡入</li>
-            <li class="fragment fade-right">向右淡入</li>
-            <li class="fragment shrink">缩小</li>
-            <li class="fragment grow">放大</li>
-            <li class="fragment roll-in">滚入</li>
-            <li class="fragment highlight-red">高亮红色</li>
-          </section>
+  
+</script></code></pre>
+  </section>
 
-        </section>
+</section>
+        
       </div>
     </div>  
 

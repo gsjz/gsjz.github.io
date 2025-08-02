@@ -16,7 +16,7 @@
 </head>
 <body>
   <h1>括号序列 → 二叉树</h1>
-  <input id="bracket-input" placeholder="输入合法括号序列如 (()())" />
+  <input id="bracket-input" value="(())()" placeholder="输入合法括号序列" />
   <button onclick="visualize()">生成树</button>
   <br/>
   <svg width="800" height="400"></svg>
@@ -118,6 +118,8 @@
       .attr('dy', -12)
       .text(d=>d.name);
   }
+
+  window.onload = visualize();
   </script>
 </body>
 </html>

@@ -3,17 +3,11 @@
   <head>
     <meta charset="utf-8">
     <title>No Name</title>
+    <link rel="icon" href="favicon.ico">
     <link rel="stylesheet" href="dist/reveal.css">
     <link rel="stylesheet" href="dist/theme/white.css">
-    <link rel="stylesheet" href="plugin/highlight/monokai.css">
-    <style>
-      .reveal .slides section {
-        text-align: left;
-        justify-content: flex-start;
-        align-items: flex-start;
-      }
-    </style>
-
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css">
+    <link rel="stylesheet" href="src/mysetting.css">
   </head>
   <body>
     <div class="reveal">
@@ -21,9 +15,6 @@
         <section>
             Write something here.
         </section>
-
-
-
 
 
         <!-- The following section should be delete after finished the project -->
@@ -62,7 +53,8 @@
           <section>
             <h3>逐步代码测试</h3>
 
-<pre><code class="language-cpp" data-line-numbers="3|7|5-6"><script type="text/template">void solve()
+<pre><code data-trim data-noescape class="language-cpp" data-line-numbers="3|7|5-6"><script type="text/template">
+void solve()
 {
     auto fib = [&](this auto self, int n)
     { 

@@ -1,0 +1,13 @@
+.reveal .slides section {
+    text-align: left;
+    justify-content: flex-start;
+    align-items: flex-start;
+}
+code {
+background-color: rgba(200, 200, 200, 0.25); /* 更淡的灰 */
+font-family: Consolas, 'Courier New', monospace;
+font-size: 0.95em;
+padding: 0.1em 0.4em; /* ⬅️ 上下更窄，左右不变 */
+border-radius: 4px;
+font-weight: bold;
+}
