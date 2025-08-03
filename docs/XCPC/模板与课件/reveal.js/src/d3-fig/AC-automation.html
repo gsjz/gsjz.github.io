@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AC 自动机演示</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; }
+    svg { border: 1px solid #ccc; margin-top: 10px; }
+    .node circle { fill: #fff; stroke: #333; stroke-width: 2px; }
+    .node.active circle { fill: orange; }
+    .link { fill: none; stroke: #999; stroke-width: 1.5px; }
+    .fail { fill: none; stroke-dasharray: 4; }
+    .label { font-size: 12px; pointer-events: none; }
+    input, button { margin: 5px; padding: 5px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h2>AC 自动机模拟器</h2>
+  <div>
+    模式串（逗号分隔）: <input id="patterns" value="he,she,his,her">
+    <br>
+    文本串：<input id="text" value="ushers">
+    <br>
+    <button onclick="buildAutomaton()">构建自动机</button>
+    <button onclick="nextStep()">下一步</button>
+  </div>
+  <svg id="viz" width="960" height="500"></svg>
+
+  <script>
+    const svg = d3.select("#viz");
+    const width = +svg.attr("width");
+    const height = +svg.attr("height");
+    let g;
+
+    let trie = { id: 0, children: {}, fail: null, output: [] };
+    let nodeId = 1;
+    let nodes = [], links = [], fails = [];
+    let stepIndex = 0, currentNode = null;
+
+    // 颜色刻度，用于给不同源节点的 fail 指针着色
+    const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+    function buildAutomaton() {
+      reset();
+      const patterns = document.getElementById("patterns").value.split(",");
+      patterns.forEach(p => insert(p.trim()));
+      buildFail();
+      layout();
+      draw();
+    }
+
+    function insert(word) {
+      let node = trie;
+      for (const ch of word) {
+        if (!node.children[ch]) {
+          node.children[ch] = { id: nodeId++, char: ch, children: {}, fail: null, output: [] };
+          links.push({ source: node, target: node.children[ch], label: ch });
+        }
+        node = node.children[ch];
+      }
+      node.output.push(word);
+    }
+
+    function buildFail() {
+      const queue = [];
+      Object.values(trie.children).forEach(child => {
+        child.fail = trie;
+        queue.push(child);
+        fails.push({ source: child, target: trie });
+      });
+      while (queue.length) {
+        const node = queue.shift();
+        Object.entries(node.children).forEach(([ch, child]) => {
+          queue.push(child);
+          let f = node.fail;
+          while (f && !f.children[ch]) f = f.fail;
+          child.fail = f ? f.children[ch] : trie;
+          fails.push({ source: child, target: child.fail });
+          child.output = child.output.concat(child.fail.output);
+        });
+      }
+    }
+
+    function layout() {
+      nodes = [];
+      const levels = [];
+      function dfs(node, depth) {
+        node.depth = depth;
+        levels[depth] = levels[depth] || [];
+        levels[depth].push(node);
+        Object.values(node.children).forEach(child => dfs(child, depth + 1));
+      }
+      dfs(trie, 0);
+      levels.forEach((level, depth) => {
+        const span = (level.length - 1) * 100;
+        level.forEach((node, i) => {
+          node.x = (width / 2) + i * 100 - span / 2;
+          node.y = 50 + depth * 100;
+          nodes.push(node);
+        });
+      });
+      // 设置颜色域，确保每次绘制都能覆盖所有可能的源节点 id
+      color.domain(nodes.map(d => d.id));
+    }
+
+    function draw() {
+      svg.selectAll("*").remove();
+      g = svg.append("g");
+
+      // 正常边
+      g.selectAll(".link").data(links).join("line")
+        .attr("class", "link")
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+
+      // 边标签
+      g.selectAll(".link-label").data(links).join("text")
+        .attr("class", "label")
+        .attr("x", d => (d.source.x + d.target.x)/2)
+        .attr("y", d => (d.source.y + d.target.y)/2 - 5)
+        .text(d => d.label);
+
+      // 失败指针，以不同颜色绘制
+      g.selectAll(".fail").data(fails).join("path")
+        .attr("class", "fail")
+        .attr("d", d => {
+          const { x: x1, y: y1 } = d.source;
+          const { x: x2, y: y2 } = d.target;
+          const mx = (x1 + x2) / 2;
+          return `M${x1},${y1} C${mx},${y1 - 50} ${mx},${y2 + 50} ${x2},${y2}`;
+        })
+        .attr("stroke", d => color(d.source.id));
+
+      // 节点
+      const node = g.selectAll(".node").data(nodes).join("g")
+        .attr("class", d => "node" + (d === currentNode ? " active" : ""))
+        .attr("transform", d => `translate(${d.x},${d.y})`);
+
+      node.append("circle").attr("r", 20);
+      node.append("text").attr("class", "label").attr("text-anchor", "middle").attr("dy", -5)
+        .text(d => d.id);
+      node.append("text").attr("class", "label").attr("text-anchor", "middle").attr("dy", 15)
+        .text(d => d.output.join(","));
+    }
+
+    function nextStep() {
+      const text = document.getElementById("text").value;
+      // 初始时定位到根
+      if (stepIndex === 0) currentNode = trie;
+      // 超出文本长度则结束
+      if (stepIndex >= text.length) { alert("匹配结束！"); return; }
+      // 当前字符
+      const ch = text[stepIndex];
+      // 跟随失败指针直到存在对应子节点或回到根
+      while (currentNode && !currentNode.children[ch]) currentNode = currentNode.fail;
+      // 转移到下一状态或根
+      currentNode = currentNode ? currentNode.children[ch] : trie;
+      // 递增步数
+      stepIndex++;
+      // 绘制当前状态
+      draw();
+    }
+
+    function reset() {
+      nodeId = 1;
+      trie = { id: 0, children: {}, fail: null, output: [] };
+      nodes = [];
+      links = [];
+      fails = [];
+      currentNode = null;
+      stepIndex = 0;
+    }
+  </script>
+</body>
+</html>
