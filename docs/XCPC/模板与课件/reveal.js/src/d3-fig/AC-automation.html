@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>AC 自动机演示</title>
+  <title>AC 自动机演示（分步构造 Fail 指针 + 分步匹配）</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
     body { font-family: sans-serif; text-align: center; }
+    #status { margin-top: 10px; font-size: 14px; color: #333; }
     svg { border: 1px solid #ccc; margin-top: 10px; }
     .node circle { fill: #fff; stroke: #333; stroke-width: 2px; }
     .node.active circle { fill: orange; }
@@ -18,36 +19,43 @@
 <body>
   <h2>AC 自动机模拟器</h2>
   <div>
-    模式串（逗号分隔）: <input id="patterns" value="he,she,his,her">
+    模式串（逗号分隔）: <input id="patterns" value="he,she,his,her" oninput="patternsChanged()">
     <br>
-    文本串：<input id="text" value="ushers">
+    文本串：<input id="text" value="ushers" oninput="resetMatch()">
     <br>
     <button onclick="buildAutomaton()">构建自动机</button>
-    <button onclick="nextStep()">下一步</button>
+    <button onclick="nextStep()"><span id="btn-label">下一步（构造 Fail）</span></button>
   </div>
   <svg id="viz" width="960" height="500"></svg>
+  <div id="status">状态：等待构建自动机</div>
 
   <script>
     const svg = d3.select("#viz");
     const width = +svg.attr("width");
-    const height = +svg.attr("height");
-    let g;
-
-    let trie = { id: 0, children: {}, fail: null, output: [] };
-    let nodeId = 1;
+    let trie, nodeId;
     let nodes = [], links = [], fails = [];
-    let stepIndex = 0, currentNode = null;
-
-    // 颜色刻度，用于给不同源节点的 fail 指针着色
+    let phase = 'idle', failSteps = [], failStepIndex = 0, matchStepIndex = 0, currentNode;
     const color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    function buildAutomaton() {
+    function updateStatus(msg) {
+      document.getElementById('status').textContent = msg;
+    }
+
+    function reset() {
+      nodeId = 1;
+      trie = { id: 0, children: {}, fail: null, output: [] };
+      nodes = []; links = []; fails = [];
+      phase = 'idle';
+      failSteps = []; failStepIndex = 0;
+      matchStepIndex = 0; currentNode = null;
+      d3.select('#btn-label').text('下一步（构造 Fail）');
+      svg.selectAll('*').remove();
+      updateStatus('状态：自动机已重置');
+    }
+
+    function patternsChanged() {
       reset();
-      const patterns = document.getElementById("patterns").value.split(",");
-      patterns.forEach(p => insert(p.trim()));
-      buildFail();
-      layout();
-      draw();
+      updateStatus('状态：模式串已修改，请重新构建自动机');
     }
 
     function insert(word) {
@@ -62,116 +70,107 @@
       node.output.push(word);
     }
 
-    function buildFail() {
+    function buildAutomaton() {
+      const patterns = document.getElementById('patterns').value.split(',').map(s => s.trim()).filter(s => s);
+      if (!patterns.length) { alert('请提供至少一个有效的模式串'); return; }
+      reset(); phase = 'fail';
+      patterns.forEach(p => insert(p));
+
+      // 构造 Fail 步骤
       const queue = [];
       Object.values(trie.children).forEach(child => {
         child.fail = trie;
+        failSteps.push({ source: child, target: trie, mergeOutput: () => { child.output = child.output.concat(trie.output); } });
         queue.push(child);
-        fails.push({ source: child, target: trie });
       });
-      while (queue.length) {
-        const node = queue.shift();
+      for (let i = 0; i < queue.length; i++) {
+        const node = queue[i];
         Object.entries(node.children).forEach(([ch, child]) => {
           queue.push(child);
-          let f = node.fail;
-          while (f && !f.children[ch]) f = f.fail;
-          child.fail = f ? f.children[ch] : trie;
-          fails.push({ source: child, target: child.fail });
-          child.output = child.output.concat(child.fail.output);
+          failSteps.push({
+            source: child,
+            computeTarget: () => {
+              let f = node.fail;
+              while (f && !f.children[ch]) f = f.fail;
+              return f ? f.children[ch] : trie;
+            },
+            mergeOutput() {
+              const tgt = this.computeTarget();
+              child.output = child.output.concat(tgt.output);
+            }
+          });
         });
       }
-    }
-
-    function layout() {
-      nodes = [];
-      const levels = [];
-      function dfs(node, depth) {
-        node.depth = depth;
-        levels[depth] = levels[depth] || [];
-        levels[depth].push(node);
-        Object.values(node.children).forEach(child => dfs(child, depth + 1));
-      }
-      dfs(trie, 0);
-      levels.forEach((level, depth) => {
-        const span = (level.length - 1) * 100;
-        level.forEach((node, i) => {
-          node.x = (width / 2) + i * 100 - span / 2;
-          node.y = 50 + depth * 100;
-          nodes.push(node);
-        });
-      });
-      // 设置颜色域，确保每次绘制都能覆盖所有可能的源节点 id
-      color.domain(nodes.map(d => d.id));
-    }
-
-    function draw() {
-      svg.selectAll("*").remove();
-      g = svg.append("g");
-
-      // 正常边
-      g.selectAll(".link").data(links).join("line")
-        .attr("class", "link")
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
-
-      // 边标签
-      g.selectAll(".link-label").data(links).join("text")
-        .attr("class", "label")
-        .attr("x", d => (d.source.x + d.target.x)/2)
-        .attr("y", d => (d.source.y + d.target.y)/2 - 5)
-        .text(d => d.label);
-
-      // 失败指针，以不同颜色绘制
-      g.selectAll(".fail").data(fails).join("path")
-        .attr("class", "fail")
-        .attr("d", d => {
-          const { x: x1, y: y1 } = d.source;
-          const { x: x2, y: y2 } = d.target;
-          const mx = (x1 + x2) / 2;
-          return `M${x1},${y1} C${mx},${y1 - 50} ${mx},${y2 + 50} ${x2},${y2}`;
-        })
-        .attr("stroke", d => color(d.source.id));
-
-      // 节点
-      const node = g.selectAll(".node").data(nodes).join("g")
-        .attr("class", d => "node" + (d === currentNode ? " active" : ""))
-        .attr("transform", d => `translate(${d.x},${d.y})`);
-
-      node.append("circle").attr("r", 20);
-      node.append("text").attr("class", "label").attr("text-anchor", "middle").attr("dy", -5)
-        .text(d => d.id);
-      node.append("text").attr("class", "label").attr("text-anchor", "middle").attr("dy", 15)
-        .text(d => d.output.join(","));
+      layout(); draw();
+      updateStatus('状态：自动机构建完成，准备开始构造 Fail 指针');
     }
 
     function nextStep() {
-      const text = document.getElementById("text").value;
-      // 初始时定位到根
-      if (stepIndex === 0) currentNode = trie;
-      // 超出文本长度则结束
-      if (stepIndex >= text.length) { alert("匹配结束！"); return; }
-      // 当前字符
-      const ch = text[stepIndex];
-      // 跟随失败指针直到存在对应子节点或回到根
-      while (currentNode && !currentNode.children[ch]) currentNode = currentNode.fail;
-      // 转移到下一状态或根
-      currentNode = currentNode ? currentNode.children[ch] : trie;
-      // 递增步数
-      stepIndex++;
-      // 绘制当前状态
-      draw();
+      if (phase === 'fail') nextFailStep();
+      else if (phase === 'match') nextMatchStep();
+      else alert('请先构建自动机');
     }
 
-    function reset() {
-      nodeId = 1;
-      trie = { id: 0, children: {}, fail: null, output: [] };
-      nodes = [];
-      links = [];
-      fails = [];
-      currentNode = null;
-      stepIndex = 0;
+    function nextFailStep() {
+      if (failStepIndex >= failSteps.length) {
+        phase = 'match'; currentNode = trie;
+        d3.select('#btn-label').text('下一步（文本匹配）');
+        updateStatus('状态：Fail 指针构造完毕，准备开始匹配文本');
+        return;
+      }
+      const step = failSteps[failStepIndex++];
+      const tgt = step.computeTarget ? step.computeTarget() : step.target;
+      // 更新节点 fail 指针
+      step.source.fail = tgt;
+      fails.push({ source: step.source, target: tgt });
+      step.mergeOutput(); draw();
+      updateStatus(`状态：构造 Fail (${failStepIndex}/${failSteps.length})，源节点 ID=${step.source.id}`);
+    }
+
+    function resetMatch() {
+      if (phase !== 'match') return;
+      matchStepIndex = 0; currentNode = null;
+      draw(); updateStatus('状态：文本已修改，匹配重置');
+    }
+
+    function nextMatchStep() {
+      const text = document.getElementById('text').value;
+      if (!text) { alert('请输入待匹配的文本串'); return; }
+      if (matchStepIndex === 0) currentNode = trie;
+      if (matchStepIndex >= text.length) { alert('匹配结束'); updateStatus('状态：匹配结束'); return; }
+      const ch = text[matchStepIndex];
+      // 转移
+      while (currentNode && !currentNode.children[ch]) currentNode = currentNode.fail;
+      currentNode = currentNode ? currentNode.children[ch] : trie;
+      matchStepIndex++;
+      draw();
+      const out = currentNode.output.length ? ` 匹配到: [${currentNode.output.join(',')}]` : '';
+      updateStatus(`状态：匹配第 ${matchStepIndex} 个字符 '${ch}'${out}`);
+    }
+
+    function layout() {
+      nodes = []; const levels = [];
+      (function dfs(n,d){ n.depth=d; (levels[d]=levels[d]||[]).push(n); Object.values(n.children).forEach(c=>dfs(c,d+1)); })(trie,0);
+      levels.forEach((lvl,d)=>{ const span=(lvl.length-1)*100; lvl.forEach((n,i)=>{ n.x=width/2+i*100-span/2; n.y=50+d*100; nodes.push(n); }); });
+      color.domain(nodes.map(n=>n.id));
+    }
+
+    function draw() {
+      svg.selectAll('*').remove(); const g=svg.append('g');
+      g.selectAll('.link').data(links).join('line')
+        .attr('class','link').attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+        .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+      g.selectAll('.link-label').data(links).join('text')
+        .attr('class','label').attr('x',d=>(d.source.x+d.target.x)/2)
+        .attr('y',d=>(d.source.y+d.target.y)/2-5).text(d=>d.label);
+      g.selectAll('.fail').data(fails).join('path')
+        .attr('class','fail').attr('d',d=>{const {x:x1,y:y1}=d.source; const {x:x2,y:y2}=d.target; const mx=(x1+x2)/2; return `M${x1},${y1} C${mx},${y1-50} ${mx},${y2+50} ${x2},${y2}`;})
+        .attr('stroke',d=>color(d.source.id));
+      const sel=g.selectAll('.node').data(nodes).join('g')
+        .attr('class',d=>'node'+(d===currentNode?' active':'')).attr('transform',d=>`translate(${d.x},${d.y})`);
+      sel.append('circle').attr('r',20);
+      sel.append('text').attr('class','label').attr('text-anchor','middle').attr('dy',-5).text(d=>d.id);
+      sel.append('text').attr('class','label').attr('text-anchor','middle').attr('dy',15).text(d=>d.output.join(','));
     }
   </script>
 </body>
