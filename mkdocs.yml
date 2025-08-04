@@ -32,6 +32,8 @@ nav:
       - 家教记录: 
         - yzl_lec1: XCPC/模板与课件/reveal.js/yzl_lec1.html
         - yzl_lec2: XCPC/模板与课件/reveal.js/yzl_lec2.html
+        - yzl_lec3: XCPC/模板与课件/reveal.js/yzl_lec3.html
+        - yzl_lec4: XCPC/模板与课件/reveal.js/yzl_lec4.html
   - 本科学习:
     - 本科学习/index.md
     - 考研内容:
