@@ -45,6 +45,42 @@
                     $$
                 </section>
                 <section>
+                    <h3>扰动法</h3>
+                    <div style="font-size: 55%">
+                        我考虑这样的两个函数（扰动 F 得到 G）
+
+                        $$
+                        F(n) = \sum\limits_{k=0}^{n}k^2,\quad G(n) = \sum\limits_{k=0}^{n}(k+1)^2
+                        $$
+
+                        用两种方法计算 $G(n) - F(n)$。
+
+                        <p class="fragment">第一种：直接得到 $(n+1)^2$。</p>
+                        <p class="fragment">
+                            第二种：将 $(k+1)^2$ 拆成 $k^2 + 2k + 1$，
+                            <b class="fragment">我知道 $\sum\limits_{k=0}^{n}k = \frac{n(n+1)}{2}$ ，</b>
+                            <span class ="fragment">
+                            那么我可以算出
+                            $$
+                            G(n) = F(n) + n\cdot (n+1) + (n+1)
+                            $$
+                            </span>
+                        </p>
+
+                        <p class="fragment">
+                            两种算法结果是一致的，这似乎并没有给出任何信息？
+                            <span class="fragment fade-out">😅</span>                             
+                        </p>
+                        <p class="fragment">
+                            实际上只是你知道得太多了。
+                            <span class="fragment"> 如果一个外星人👽没有听过神童高斯的故事，它可能就通过这种方式来推导 $\sum\limits_{k=0}^{n}k$。</span>
+                            <span class="fragment"> 
+                                聪明的外星人🤓还会用这种方法计算 $\sum\limits_{k=0}^{n}k^2,\sum\limits_{k=0}^{n}k^3,\cdots$
+                            </span>
+                        </p>
+                    </div>
+                </section>
+                <section>
                     $$
                     \sum\limits_{k=0}^{n} k^d
                     $$
@@ -74,21 +110,41 @@
                     <div>\( \sum_{k=1}^n k^5 = \frac{1}{6}n^6 + \frac{1}{2}n^5 + \frac{5}{12}n^4 - \frac{1}{12}n^2 \)
                     </div>
                 </section>
-
                 <section>
-
+                    <h3>多项式前缀和</h3>
+                    <p>
+                        对于多项式 $f(n)$，它有这样形式的前缀和函数
+                        $$
+                        g(n) = \sum\limits_{k=0}^{n} f(i)
+                        $$
+                        上面讨论的是 $f(n) = n^{d}$ 的特例。可以知道，$g(n)$ 是一个 $d+1$ 次多项式。
+                    </p>
+                </section>
+                <section>
                     <h3>一般结论</h3>
-
                     <p class="fragment">多项式前缀和的结果是一个次数高一次的多项式。</p>
                     <p class="fragment">这个技巧出现在 NOIP2020 微信步数，以及众多模拟题中。</p>
-                    <p class="fragment">其中的数学推导，以及求算技巧（Lagrange 插值）此处暂且不表，仅作初步印象。</p>
-
+                    <p class="fragment">它有一个比较固定的搭配技巧，即维护一些多项式的点值（而非系数）进行转移。然后再通过点值还原多项式的系数（Lagrange 插值），此处暂且不表，仅作初步印象。</p>
                 </section>
             </section>
 
             <section>
                 <section>
                     <h2>根号分治</h2>
+                </section>
+                <section>
+                    <p class="fragment" data-fragment-index="1">
+                        如何快速枚举 n 的因子？
+                        <span class="fragment" data-fragment-index="5">（算法层面的分类）</span>
+                    </p>
+                    <p class="fragment" data-fragment-index="2">
+                        如何简单估计 n 的因子数量？
+                        <span class="fragment" data-fragment-index="6">（理论层面的分类）</span>
+                    </p>
+                    <p class="fragment" data-fragment-index="3">
+                        根号分治，就是将讨论的对象，按照一个阈值划分成两类。
+                        <span class="fragment"data-fragment-index="4">通过一点分析，发现阈值接近根号时最优。</span>
+                    </p>
                 </section>
                 <section>
                     <h3>整除分块</h3>
@@ -145,14 +201,16 @@
                     $$
                 </section>
                 <section>
-                    <p>计算</p>
+                    <p>计算
                     $$
                     S = \sum_{i=1}^n \sum_{j=1}^{i} f(i,j)
                     $$
-                    <p>交换求和顺序，改写为</p>
+                    </p>
+                    <p class="fragment">交换求和顺序，改写为
                     $$
                     S = \sum_{j=1}^n \sum_{i=j}^{n} f(i,j)
                     $$
+                    </p>
                 </section>
 
                 <section>
@@ -173,8 +231,8 @@
                     <p>求和区域 $R$ 是二维点集，比如一个“下三角形”</p>
                     <p>换序就是改变遍历顺序：</p>
                     <ul>
-                        <li>先按行扫描</li>
-                        <li>变成先按列扫描</li>
+                        <li>可以按列扫描</li>
+                        <li>也可以按行扫描</li>
                     </ul>
                 </section>
 
@@ -278,13 +336,13 @@
                 <section>
                     <h3>和式反演的另一重意味</h3>
                     <p>一般我们希望简化求和，把一个求和表示成一个简单函数。</p>
-                    <p>一种迂回的战术：一个简单函数拆成求和，然后作和式变换，重新变回一个更高计算的简单形式。</p>
+                    <p>一种迂回的战术：一个简单函数拆成求和，然后作和式变换，重新变回一个更好计算的简单形式。</p>
                 </section>
                 <section>
 
                     <p>在纯粹的数论和式变换题，我们经常会直接使用对应的容斥系数公式，来拆开一个简单函数。</p>
                     <p>而在一些综合题里面，我们更倾向于去发现，是不是有两类 dp 数组符合（数论）前缀和的关系。</p>
-                    <p>反演公式使得我们只需要找出一个方向的表示，就可以知道另一个方向。</p>
+                    <p>反演公式使得我们只需要找出一个方向的表示，就可以知道另一个方向😋。</p>
                 </section>
 
                 <section>
