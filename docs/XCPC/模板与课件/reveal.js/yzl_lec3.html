@@ -59,22 +59,22 @@
                         <p class="fragment">
                             第二种：将 $(k+1)^2$ 拆成 $k^2 + 2k + 1$，
                             <b class="fragment">我知道 $\sum\limits_{k=0}^{n}k = \frac{n(n+1)}{2}$ ，</b>
-                            <span class ="fragment">
-                            那么我可以算出
-                            $$
-                            G(n) = F(n) + n\cdot (n+1) + (n+1)
-                            $$
+                            <span class="fragment">
+                                那么我可以算出
+                                $$
+                                G(n) = F(n) + n\cdot (n+1) + (n+1)
+                                $$
                             </span>
                         </p>
 
                         <p class="fragment">
                             两种算法结果是一致的，这似乎并没有给出任何信息？
-                            <span class="fragment fade-out">😅</span>                             
+                            <span class="fragment fade-out">😅</span>
                         </p>
                         <p class="fragment">
                             实际上只是你知道得太多了。
                             <span class="fragment"> 如果一个外星人👽没有听过神童高斯的故事，它可能就通过这种方式来推导 $\sum\limits_{k=0}^{n}k$。</span>
-                            <span class="fragment"> 
+                            <span class="fragment">
                                 聪明的外星人🤓还会用这种方法计算 $\sum\limits_{k=0}^{n}k^2,\sum\limits_{k=0}^{n}k^3,\cdots$
                             </span>
                         </p>
@@ -124,7 +124,8 @@
                     <h3>一般结论</h3>
                     <p class="fragment">多项式前缀和的结果是一个次数高一次的多项式。</p>
                     <p class="fragment">这个技巧出现在 NOIP2020 微信步数，以及众多模拟题中。</p>
-                    <p class="fragment">它有一个比较固定的搭配技巧，即维护一些多项式的点值（而非系数）进行转移。然后再通过点值还原多项式的系数（Lagrange 插值），此处暂且不表，仅作初步印象。</p>
+                    <p class="fragment">它有一个比较固定的搭配技巧，即维护一些多项式的点值（而非系数）进行转移。然后再通过点值还原多项式的系数（Lagrange 插值），此处暂且不表，仅作初步印象。
+                    </p>
                 </section>
             </section>
 
@@ -143,7 +144,7 @@
                     </p>
                     <p class="fragment" data-fragment-index="3">
                         根号分治，就是将讨论的对象，按照一个阈值划分成两类。
-                        <span class="fragment"data-fragment-index="4">通过一点分析，发现阈值接近根号时最优。</span>
+                        <span class="fragment" data-fragment-index="4">通过一点分析，发现阈值接近根号时最优。</span>
                     </p>
                 </section>
                 <section>
@@ -202,14 +203,14 @@
                 </section>
                 <section>
                     <p>计算
-                    $$
-                    S = \sum_{i=1}^n \sum_{j=1}^{i} f(i,j)
-                    $$
+                        $$
+                        S = \sum_{i=1}^n \sum_{j=1}^{i} f(i,j)
+                        $$
                     </p>
                     <p class="fragment">交换求和顺序，改写为
-                    $$
-                    S = \sum_{j=1}^n \sum_{i=j}^{n} f(i,j)
-                    $$
+                        $$
+                        S = \sum_{j=1}^n \sum_{i=j}^{n} f(i,j)
+                        $$
                     </p>
                 </section>
 
@@ -354,7 +355,39 @@
                     $$
                 </section>
 
-
+                <section>
+                    <h3>*关于二项式反演</h3>
+                    <div style="font-size: 80%;">
+                        <p>
+                            如果把二项式系数拆开，二项式反演即
+                            $$
+                            \frac{f_n}{n!} = \sum_k \left(\frac{g_k}{k!}\right) \cdot \left(\frac{1}{(n-k)!}\right)
+                            $$
+                            右边其实是多项式卷积的形式。从序列的角度
+                            $$
+                            \left\{\frac{f_n}{n!}\right\} = \left\{\frac{g_n}{n!}\right\} * \left\{\frac{1}{n!}\right\}
+                            $$
+                        </p>
+                    </div>
+                </section>
+                <section>
+                    <div style="font-size: 80%;">
+                        <p>
+                            把上面三个序列分别放进形式幂级数 $F(x),G(x),H(x)$。
+                        </p>
+                        <p>
+                            实际上 $H(x)$ 就是经典的 $e^x$。于是
+                            $$
+                            F(x) = G(x) \times e^{x} \Leftrightarrow G(x) = F(x) \times e^{-x}
+                            $$
+                            可以验证 $e^{-x}$ 对应的序列，正是 $\left\{\frac{(-1)^n}{n!}\right\}$。
+                        </p>
+                        <p>
+                            除了理论层面给出另一种理解，算法层面，也允许我们使用 FFT 将 $g_i,i=0,1,\cdots,n$ 的信息，
+                            用 $O(n\log n)$ 的时间转换成 $f_{i},i=0,1,\cdots,n$ 的信息。反之亦然。
+                        </p>
+                    </div>
+                </section>
 
             </section>
 
