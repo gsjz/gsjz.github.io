@@ -1,25 +1,238 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>yzl_lec5</title>
-    <link rel="icon" href="favicon.ico">
-    <link rel="stylesheet" href="dist/reveal.css">
-    <link rel="stylesheet" href="dist/theme/white.css">
-    <link rel="stylesheet" href="plugin/highlight/zenburn.css">
-    <link rel="stylesheet" href="src/mysetting.css">
-  </head>
-  <body>
-    <div class="reveal">
-      <div class="slides">
-        <section>
-          
 
+<head>
+  <meta charset="utf-8">
+  <title>yzl_lec5</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="dist/reveal.css">
+  <link rel="stylesheet" href="dist/theme/white.css">
+  <link rel="stylesheet" href="plugin/highlight/zenburn.css">
+  <link rel="stylesheet" href="src/mysetting.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <h1>yzl_lec5</h1>
+        date: 25.08.18
+      </section>
+
+      <section>
+        <h2>课程大纲</h2>
+        <li>整数单元一次同余方程</li>
+        <li>整数单元一次同余方程的首一化</li>
+        <li>整数单元一次同余方程组的合并</li>
+      </section>
+
+      <section>
+        <section>
+          <h2>整数单元一次同余方程</h2>
+          <p>
+            我们之前主要研究过整数二元一次不定方程
+            $$
+            ax + by = val
+            $$
+            的解 $(x,y)$ 构成的解集。
+          </p>
+          <p class="fragment">
+            现在研究这样的同余方程
+            $$
+            ax \equiv val \mod b
+            $$
+            的解集。不妨要求 $a,b$ 是正整数，$a$ 取 $1$ 到 $b-1$ 的值。
+          </p>
+        </section>
+        <section>
+          <h3>其实是一样的，</h3>
+          <p>
+            $$
+            ax \equiv val \mod b
+            $$
+
+          </p>
+          <li class="fragment">
+            什么情况下同余方程无解？
+          </li>
+          <li class="fragment">
+            排除掉前面的情况，同余方程是否一定有解？
+          </li>
+          <li class="fragment">
+            可以怎么刻画这个解集？
+          </li>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h2>整数单元一次同余方程的首一化</h2>
         </section>
 
-      </div>
+        <section>
+          <h3>首一多项式</h3>
+          <p>对于一个多项式 $a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_0$，
+            如果它的最高次项系数 $a_n$ 为 $1$，则称它为首一多项式。
+          </p>
+        </section>
+        <section>
+          <h3>多项式方程的首一化</h3>
+          <p>
+            研究一个多项式方程 $a_n x^{n} + a_{n-1} x^{n-1} + \cdots + a_0$ 的解，
+            如果能把最高次项的系数转化成 $1$ 又不影响解集，则称这个过程为首一化。
+          </p>
+        </section>
+        <section>
+          <h3>同余方程的首一化？</h3>
+          <p>
+            $$
+            ax \equiv val \mod b
+            $$
+            它的解集，要么无解，等价于另一个首一的同余方程的解集。
+          </p>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h2>整数单元一次同余方程组的合并</h2>
+        </section>
+        <section>
+          <h3>方程组</h3>
+          <p>当我们求解一组方程的时候，实际上是在找同时满足这些方程的解。</p>
+          <p>这个过程其实可以看成，求各个方程对应的解集，然后找它们的交集。</p>
+        </section>
+        <section>
+          <h3>无解</h3>
+          <p>可以想象有两种情况会导致方程组无解。</p>
+          <li>
+            <span class="fragment">某条方程解集本身就是空集。</span>
+            <br />（例如，其中一条方程 $0\cdot x = 1$。）
+          </li>
+          <li>
+            <span class="fragment">解集之交的确为空。</span>
+            <br />（例如，同时存在方程 $x=0$ 和 $x=1$。）
+          </li>
+          <p class="fragment">在求解方程组时，局部无解的话，一般就可以不往下算了，判断全局无解。</p>
+        </section>
+        <section>
+          <h3>首一化</h3>
+          <p>
+            本来我们应该要求解同余方程组
+            $$
+            \begin{cases}
+            a_1\cdot x \equiv val_1 \mod b_1 \\
+            a_2\cdot x \equiv val_2 \mod b_2 \\
+            \cdots \\
+            a_n\cdot x \equiv val_n \mod b_n \\
+            \end{cases}
+            $$
+            如何首一化？
+          </p>
+        </section>
+        <section>
+          <h3>问题的简化</h3>
+          <p>
+            通过前面叙述的过程，要么前面局部发现无解直接判断全局无解。反之就是要求解同余方程组，形如
+            $$
+            \begin{cases}
+            x \equiv val_1 \mod b_1 \\
+            x \equiv val_2 \mod b_2 \\
+            \cdots \\
+            x \equiv val_n \mod b_n \\
+            \end{cases}
+            $$
+          </p>
+        </section>
+        <section>
+          <h3 class="fragment">两个解集之交</h3>
+          <p class="fragment">实际上，结果要么是空集，要么是另一个可以由同余方程确定的解集。后面我们就是要仔细研究其中的细节。</p>
+          <p class="fragment">
+            把它们先打回不定方程的形式，也就是说，对于 $x$，它属于两个集合的交，当且仅当存在 $y_1,y_2$，使得
+            $$
+            \begin{cases}
+            x+b_1\cdot y_1 = val_1 \\
+            x+b_2\cdot y_2 = val_2 \\
+            \end{cases}
+            $$
+            同时成立。
+          </p>
+        </section>
+        <section>
+          <h3>无解？</h3>
+          <p>
+            假设下面能同时成立
+            $$
+            \begin{cases}
+            x+b_1\cdot y_1 = val_1 \\
+            x+b_2\cdot y_2 = val_2 \\
+            \end{cases}
+            $$
+            那么理应有
+            $$
+            b_1\cdot y_1 - b_2\cdot y_2 = val_1 - val_2
+            $$
+            什么时候上面这条式子肯定不成立，从而导出假设必然是矛盾的（即交集必然为空）？
+          </p>
+        </section>
+        <section>
+          <h3>反之，多出来的性质</h3>
+          <p>
+            $$
+            val_1 - val_2 \equiv 0 \mod \gcd(b_1, b_2)
+            $$
+            记 $g = \gcd(b_1, b_2)$，$t = \frac{val_1 - val_2}{g}$，也可以写成
+            $$
+            g\cdot b_1' \cdot y_1 - g\cdot b_2' \cdot y_2 = g\cdot t
+            $$
+            （注意，$g,t,b_1',b_2'$ 的生成不依赖于 $y_1,y_2$。它们是取 $y_1,y_2$ 之前就可以提前写好的两个东西。
+            它们在这里只是为了方便书写，以及便于洞察性质而辅助定义的。）
+          </p>
+        </section>
+        <section>
+          <h3>更进一步</h3>
+          <p>
+            可以看出，$y_1,y_2$ 应当满足
+            $$
+            b_1' \cdot y_1 - b_2' \cdot y_2 = t
+            $$
+            这可以推出，$y_1$ 在模 $b_2'$ 意义是一个定值。从而如果 $x$ 存在，则
+            $$
+            x = val_1 - b_1\cdot y_1
+            $$
+            必然在模 $b_2'\cdot b_1$ 意义下是一个定值。把辅助定义的 $b_2'$ 写回来，即 $b_2'\cdot b_1 = \frac{b_1\cdot b_2}{\gcd(b_1,b_2)}$。
+          </p>
+        </section>
+        <section>
+          <h3>怎么确定这个定值？以及从 $\subseteq$ 到 $=$</h3>
+          <p>
+            如果把合并后的解集记作 $L$，以及模 $\frac{b_1\cdot b_2}{\gcd(b_1,b_2)}$ 只可能等于某个定值 $r$ 记为 $R$，
+            那么我们目前的工作只是发现了 $L\subseteq R$。<br />
+            至于 $L$ 具体等于什么，甚至说是不是空集，都还没讨论完全。但这时会有一个操作能使得 $L$ 被确定：
+          </p>
+          <p class="fragment">
+            构造一个 $R = \{x : x\equiv r \mod \frac{b_1\cdot b_2}{\gcd(b_1,b_2)}\}$ 并发现
+            $$
+            L\supseteq R
+            $$
+          </p>
+        </section>
+        <section>
+          <h3>构造</h3>
+          <p>
+            实际上这里存在一种简洁并且更适合拿来设计算法的方法，来找到这个值。对于 $b_1,b_2,g=\gcd(b_1,b_2)$，存在 $u,v$ 使得
+            $$
+            b_1 u + b_2 v = g
+            $$
+            取
+            $$
+            r = val_1 + \frac{val_2 - val_1}{g}\cdot u \cdot b_1
+            $$
+            即可。（怎么验证？）
+          </p>
+        </section>
+      </section>
     </div>
-    <!-- 用户文件截止 -->
+  </div>
+  <!-- 用户文件截止 -->
 
 
 
@@ -28,44 +241,45 @@
 
 
 
-    
-    <!-- 主库 -->
-    <script src="dist/reveal.js"></script>
 
-    <!-- 插件 -->
-    <script src="plugin/markdown/markdown.js"></script>
-    <script src="plugin/highlight/highlight.js"></script>
-    <script src="plugin/notes/notes.js"></script>
-    <script src="plugin/zoom/zoom.js"></script>
-    <script src="plugin/search/search.js"></script>
-    <!-- <script src="plugin/fullscreen/fullscreen.js"></script> -->
-    <!-- <script src="plugin/menu/menu.js"></script> -->
-    <script src="plugin/math/math.js"></script>
-    <!-- <script src="plugin/autoanimate/autoanimate.js"></script> -->
+  <!-- 主库 -->
+  <script src="dist/reveal.js"></script>
 
-    <script src="plugin/reveald3.js"></script>
+  <!-- 插件 -->
+  <script src="plugin/markdown/markdown.js"></script>
+  <script src="plugin/highlight/highlight.js"></script>
+  <script src="plugin/notes/notes.js"></script>
+  <script src="plugin/zoom/zoom.js"></script>
+  <script src="plugin/search/search.js"></script>
+  <!-- <script src="plugin/fullscreen/fullscreen.js"></script> -->
+  <!-- <script src="plugin/menu/menu.js"></script> -->
+  <script src="plugin/math/math.js"></script>
+  <!-- <script src="plugin/autoanimate/autoanimate.js"></script> -->
 
-    <!-- 初始化 -->
-    <script>
-      Reveal.initialize({
-        hash: true,
-        slideNumber: true,
-        controls: true,
-        progress: true,
-        center: true,
-        plugins: [
-          RevealMarkdown,
-          RevealHighlight,
-          RevealNotes,
-          RevealZoom,
-          RevealSearch,
-          // RevealFullscreen,
-          // RevealMenu,
-          RevealMath,
-          // RevealAutoAnimate
-          Reveald3,
-        ]
-      });
-    </script>
-  </body>
+  <script src="plugin/reveald3.js"></script>
+
+  <!-- 初始化 -->
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      controls: true,
+      progress: true,
+      center: true,
+      plugins: [
+        RevealMarkdown,
+        RevealHighlight,
+        RevealNotes,
+        RevealZoom,
+        RevealSearch,
+        // RevealFullscreen,
+        // RevealMenu,
+        RevealMath,
+        // RevealAutoAnimate
+        Reveald3,
+      ]
+    });
+  </script>
+</body>
+
 </html>
