@@ -22,6 +22,7 @@ nav:
       - XCPC/分类题解/异或线性基.md
       - XCPC/分类题解/杜教筛.md
       - XCPC/分类题解/Fibonacci 数.md
+      - XCPC/分类题解/AC 自动机.md
     - 普通题解:
       - XCPC/普通题解/杂题集一.md
       - XCPC/普通题解/杂题集二.md
@@ -145,10 +146,6 @@ plugins:
         - zh
         - en
         - ja
-  # [给单篇文章添加标签]
-  # https://squidfunk.github.io/mkdocs-material/setup/setting-up-tags/
-  # https://squidfunk.github.io/mkdocs-material/plugins/tags/#meta.tags
-  - tags
   - meta
 markdown_extensions:
   # [数学公式支持]

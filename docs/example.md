@@ -1,9 +1,3 @@
----
-title: 示例
-tags:
-  - test
----
-
 # example
 
 
