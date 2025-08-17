@@ -22,7 +22,6 @@ nav:
       - XCPC/分类题解/异或线性基.md
       - XCPC/分类题解/杜教筛.md
       - XCPC/分类题解/Fibonacci 数.md
-      - XCPC/分类题解/AC 自动机.md
     - 普通题解:
       - XCPC/普通题解/杂题集一.md
       - XCPC/普通题解/杂题集二.md
@@ -30,6 +29,10 @@ nav:
     - 模板与课件:
       - XCPC/模板与课件/参赛模板.md
       - XCPC/模板与课件/Min-Max 容斥课件.md
+      - 算法可视化:
+        - AC 自动机: XCPC/模板与课件/算法可视化/AC-automaton.html
+        - 后缀自动机: XCPC/模板与课件/算法可视化/suffix-automaton.html
+        - 草稿: XCPC/模板与课件/算法可视化/draft.html
       - 家教记录: 
         - yzl_lec1: XCPC/模板与课件/reveal.js/yzl_lec1.html
         - yzl_lec2: XCPC/模板与课件/reveal.js/yzl_lec2.html

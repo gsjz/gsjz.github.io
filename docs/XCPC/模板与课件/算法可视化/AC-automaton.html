@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>AC 自动机可视化演示 — 分步构造 Fail / 分步匹配（改进版）</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{--accent:#1f77b4}
+    body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans CJK', sans-serif; display:flex; height:100vh}
+    /* 左侧画布 */
+    #stage{flex:1; position:relative; background:#fafafa;}
+    svg{width:100%;height:100%}
+
+    /* 顶部控制（4K 友好，能单行则单行，不够自动换行） */
+    header.controls{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(255,255,255,0.98);padding:12px 20px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.10);z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+    header.controls label{margin-right:8px;font-size:13px;display:flex;align-items:center;gap:6px}
+    header.controls input[type=text]{padding:8px 10px;margin:0 6px 0 3px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+    header.controls button{margin-left:0;padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px}
+
+    /* 右侧面板 */
+    #sidebar{width:380px;border-left:1px solid #e6e6e6;background:#fff;padding:12px;box-sizing:border-box;overflow:auto}
+    #sidebar h3{margin:10px 0 6px;font-size:15px}
+    #log{height:140px;overflow:auto;background:#f7f7f7;padding:8px;border-radius:6px;border:1px solid #eee;font-size:13px}
+    .stat{margin:6px 0;padding:8px;background:#fff;border:1px solid #f0f0f0;border-radius:6px}
+    .small{font-size:13px;color:#666}
+
+    /* 节点/边样式 */
+    .node circle{fill:#fff;stroke:#333;stroke-width:1.5px}
+    .node.active circle{fill:gold}
+    .node text{font-size:12px;pointer-events:none}
+
+    .link{stroke:var(--link-color,#333); color:var(--link-color,#333); stroke-width:1.5px; opacity:0.95; marker-end:url(#arrow)}
+    .link.highlight{ --link-color: orange; color:var(--link-color); stroke-width:3px; marker-end:url(#arrow-highlight); }
+
+    .faillink{stroke:var(--fail-color,#d33); color:var(--fail-color,#d33); stroke-dasharray:5 4; stroke-width:1.5px; opacity:0.9; marker-end:url(#failArrow)}
+    .faillink.highlight{ --fail-color:#ffd700; color:var(--fail-color); stroke-width:3px; marker-end:url(#failArrow-highlight); }
+
+    .edgelabel{font-size:12px;pointer-events:none;fill:#000;paint-order:stroke;stroke:#fff;stroke-width:3px}
+    .edgelabel.highlight{ fill:currentColor; font-weight:700; }
+
+    .badge { pointer-events: none; }
+    .badge circle { fill: var(--accent); }
+    .badge text { font-size:11px; fill: white; font-weight:600; text-anchor:middle; dominant-baseline:central; }
+
+    #statedetail{height:260px;overflow:auto;border-radius:6px;border:1px solid #eee;padding:8px;background:#fafafa}
+
+    .small-btn{padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;margin-left:6px}
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <header class="controls">
+      <label>模式串（逗号分隔）：<input id="patterns" type="text" value="he,she,his,her" /></label>
+      <label>文本串：<input id="text" type="text" value="ushers" /></label>
+      <button id="btnBuild">构建自动机</button>
+      <button id="btnNext">下一步</button>
+      <button id="btnAuto">自动播放</button>
+      <label><input id="showTrans" type="checkbox" checked /> 显示转移</label>
+      <label><input id="showFail" type="checkbox" checked /> 显示 Fail</label>
+      <label><input id="pinAfterDrag" type="checkbox" checked /> 拖拽后固定</label>
+      <label><input id="enableAdjust" type="checkbox" /> 启用调整模式</label>
+      <button id="btnRelayout" title="重新启动力导向">重排</button>
+      <button id="btnUnfix">释放固定</button>
+    </header>
+    <svg id="svg"></svg>
+  </div>
+
+  <div id="sidebar">
+    <h3>构造 / 匹配日志
+      <button id="btnClearLog" class="small-btn" style="margin-left:8px">清空</button>
+      <button id="btnCopyLog" class="小small-btn">复制</button>
+    </h3>
+    <div id="log"></div>
+
+    <h3>节点详情（点击图中节点）</h3>
+    <div id="statedetail"><em>点击某个节点查看其字符、深度、Fail 指向、输出（匹配的模式串）。调整模式下点击无效。</em></div>
+
+    <h3>匹配控制</h3>
+    <div class="stat">
+      <div>
+        <button id="btnMatchStep">匹配下一字符</button>
+        <button id="btnMatchRun">跑完整个文本</button>
+        <button id="btnMatchReset" class="small-btn">重置匹配</button>
+      </div>
+      <div id="matchResult" class="small" style="margin-top:6px"></div>
+    </div>
+
+    <h3>实时统计</h3>
+    <div class="stat">
+      <div>节点数（nodes）：<span id="statNodes">0</span></div>
+      <div>转移数（edges）：<span id="statEdges">0</span></div>
+      <div>Fail 指针数：<span id="statFails">0</span></div>
+      <div>已匹配次数：<span id="statHits">0</span></div>
+    </div>
+  </div>
+
+  <script>
+    // ====== d3 & svg 初始化（加入 zoom.filter + 关闭双击缩放） ======
+    const svg = d3.select('#svg');
+    const rootG = svg.append('g');
+
+    const zoom = d3.zoom()
+      .scaleExtent([0.2,3])
+      .filter((event) => {
+        if (event.type === 'wheel') return true; // 允许滚轮缩放
+        const t = event.target;
+        const isOnNode = !!(t.closest && t.closest('.node'));
+        const isOnLabel = !!(t.closest && t.closest('.edgelabel'));
+        return !(isOnNode || isOnLabel); // 在节点/标签上不触发平移缩放
+      })
+      .on('zoom', (event)=>rootG.attr('transform', event.transform));
+    svg.call(zoom).on('dblclick.zoom', null);
+
+    const defs = svg.append('defs');
+    // 普通转移箭头
+    defs.append('marker').attr('id','arrow').attr('viewBox','0 -5 10 10').attr('refX',16).attr('refY',0).attr('markerWidth',8).attr('markerHeight',8).attr('orient','auto').append('path').attr('d','M0,-5L10,0L0,5').attr('fill','currentColor');
+    defs.append('marker').attr('id','arrow-highlight').attr('viewBox','0 -5 12 12').attr('refX',18).attr('refY',0).attr('markerWidth',10).attr('markerHeight',10).attr('orient','auto').append('path').attr('d','M0,-5L12,0L0,5').attr('fill','orange');
+
+    // Fail 箭头（虚线，使用 currentColor 与样式同步）
+    defs.append('marker').attr('id','failArrow').attr('viewBox','0 -5 10 10').attr('refX',16).attr('refY',0).attr('markerWidth',8).attr('markerHeight',8).attr('orient','auto')
+      .append('path').attr('d','M0,-5L10,0L0,5').attr('fill','currentColor');
+    defs.append('marker').attr('id','failArrow-highlight').attr('viewBox','0 -5 12 12').attr('refX',18).attr('refY',0).attr('markerWidth',10).attr('markerHeight',10).attr('orient','auto')
+      .append('path').attr('d','M0,-5L12,0L0,5').attr('fill','#ffd700');
+
+    const linkLayer = rootG.append('g').attr('class','links');
+    const failLayer = rootG.append('g').attr('class','faillinks');
+    const labelLayer = rootG.append('g').attr('class','labels');
+    const nodeLayer = rootG.append('g').attr('class','nodes');
+
+    let linkSel = linkLayer.selectAll('line');
+    let failSel = failLayer.selectAll('line');
+    let labSel = labelLayer.selectAll('text');
+    let nodeSel = nodeLayer.selectAll('g');
+
+    // 点击 vs 拖动 阈值
+    const CLICK_TOL = 3; // 像素
+    let _lastDown = null;
+    svg.on('pointerdown', (event)=>{ _lastDown = { x: event.clientX, y: event.clientY }; });
+    svg.on('pointerup', ()=>{ _lastDown = null; });
+
+    // ====== AC Trie 数据结构 ======
+    class Node { constructor(id,char=''){ this.id=id; this.char=char; this.children={}; this.fail=null; this.output=[]; this.depth=0; } }
+    class AC {
+      constructor(){ this.root=new Node(0,''); this.nodes=[this.root]; this.nextId=1; this.links=[]; this.fails=[]; }
+      insert(word){ let u=this.root; for(const ch of word){ if(!u.children[ch]){ const v=new Node(this.nextId++,ch); v.depth=u.depth+1; u.children[ch]=v; this.nodes.push(v); this.links.push({source:u.id,target:v.id,ch}); } u=u.children[ch]; } u.output.push(word); }
+      buildFailSteps(){
+        const steps=[]; const q=[];
+        for(const ch in this.root.children){ const v=this.root.children[ch]; v.fail=this.root; steps.push({type:'set',source:v.id,target:0}); q.push(v); }
+        for(let i=0;i<q.length;i++){
+          const u=q[i];
+          for(const ch in u.children){ const v=u.children[ch]; q.push(v);
+            steps.push({type:'compute',source:v.id,via:ch,parent:u.id});
+          }
+        }
+        return steps;
+      }
+      doFailStep(step){
+        const getById=(id)=>this.nodes.find(n=>n.id===id);
+        if(step.type==='set'){
+          const s=getById(step.source), t=getById(step.target); s.fail=t; this.fails.push({source:s.id,target:t.id});
+          s.output = s.output.concat(t.output);
+          return {desc:`设定 fail: ${s.id} → ${t.id}`};
+        }else{
+          const s=getById(step.source); const parent=getById(step.parent); const ch=step.via;
+          let f=parent.fail; while(f && !f.children[ch]) f=f.fail; const tgt=f? f.children[ch] : this.root; s.fail=tgt; this.fails.push({source:s.id,target:tgt.id});
+          s.output = s.output.concat(tgt.output);
+          return {desc:`计算 fail(${s.id})，沿 '${ch}' 回退到 ${tgt.id}`};
+        }
+      }
+    }
+
+    // ====== 状态与可视化 ======
+    let ac=null, steps=[], stepIndex=0, phase='idle', autoTimer=null, autoPlaying=false;
+    let matchIdx=0, curNode=null, hits=0; // 匹配状态
+    const nodeById=new Map();
+
+    // 力导向
+    const simulation = d3.forceSimulation()
+      .force('link', d3.forceLink().id(d=>d.id).distance(120).strength(1))
+      .force('charge', d3.forceManyBody().strength(-550))
+      .on('tick', ticked);
+
+    function getCanvasSize(){ const el=document.getElementById('svg'); const rect=el.getBoundingClientRect(); return {w:rect.width,h:rect.height}; }
+    function setCenterForce(){ const {w,h}=getCanvasSize(); simulation.force('center', d3.forceCenter(w/2, h/2)); }
+    setCenterForce();
+
+    function computeGraph(){
+      const nodes=ac.nodes.map(n=>({id:n.id,char:n.char,depth:n.depth,output:n.output}));
+      const links=ac.links.map(e=>({source:e.source,target:e.target,ch:e.ch}));
+      const fails=ac.fails.map(e=>({source:e.source,target:e.target}));
+      return {nodes,links,fails};
+    }
+
+    function rebuild(){
+      const {nodes,links,fails}=computeGraph();
+      nodes.forEach(n=>{ const old=nodeById.get(n.id); if(old){ n.x=old.x; n.y=old.y; n.fx=old.fx; n.fy=old.fy; } nodeById.set(n.id,n); });
+
+      linkSel = linkLayer.selectAll('line.link').data(links, d=>`${d.source}->${d.target}@${d.ch}`);
+      linkSel.exit().remove(); const linkEnter=linkSel.enter().append('line').attr('class','link'); linkSel=linkEnter.merge(linkSel);
+
+      failSel = failLayer.selectAll('line.faillink').data(fails, d=>`f${d.source}->${d.target}`);
+      failSel.exit().remove(); const failEnter=failSel.enter().append('line').attr('class','faillink'); failSel=failEnter.merge(failSel);
+
+      labSel = labelLayer.selectAll('text.edgelabel').data(links, d=>`${d.source}->${d.target}@${d.ch}`);
+      labSel.exit().remove(); const labEnter=labSel.enter().append('text').attr('class','edgelabel').text(d=>d.ch); labSel=labEnter.merge(labSel);
+
+      nodeSel = nodeLayer.selectAll('g.node').data(nodes, d=>d.id);
+      nodeSel.exit().remove();
+      const nodeEnter = nodeSel.enter().append('g')
+        .attr('class','node')
+        .style('cursor','pointer')
+        .on('pointerdown', (event)=> event.stopPropagation())
+        .on('mousedown', (event)=> event.stopPropagation())
+        .on('touchstart', (event)=> event.stopPropagation())
+        .on('click', (event,d)=>{
+          if (document.getElementById('enableAdjust').checked) return;
+          if (_lastDown){
+            const dx = event.clientX - _lastDown.x;
+            const dy = event.clientY - _lastDown.y;
+            if (dx*dx + dy*dy > CLICK_TOL*CLICK_TOL) return;
+          }
+          if (d._dragMoved) { d._dragMoved=false; return; }
+          showDetail(d.id);
+        });
+      nodeEnter.append('circle').attr('r',20);
+      nodeEnter.append('text').attr('dy',4).attr('text-anchor','middle').text(d=>d.id);
+      const badge = nodeEnter.append('g').attr('class','badge').attr('transform','translate(14,-14)');
+      badge.append('circle').attr('r',10);
+      badge.append('text').attr('dy',0);
+
+      const DRAG_CLICK_TOL=3;
+      nodeEnter.call(d3.drag()
+        .on('start', (event,d)=>{ if(!event.active) simulation.alphaTarget(0.3).restart(); d._dragMoved=false; d._dragStart={x:d.x,y:d.y}; if(document.getElementById('enableAdjust').checked){ d.fx=d.x; d.fy=d.y; } })
+        .on('drag', (event,d)=>{ if(!document.getElementById('enableAdjust').checked) return; d.fx=event.x; d.fy=event.y; if(!d._dragMoved){ const dx=(d.fx-d._dragStart.x)||0, dy=(d.fy-d._dragStart.y)||0; if(dx*dx+dy*dy>DRAG_CLICK_TOL*DRAG_CLICK_TOL) d._dragMoved=true; } })
+        .on('end', (event,d)=>{ if(!document.getElementById('enableAdjust').checked){ if(!event.active) simulation.alphaTarget(0); return; } if(!document.getElementById('pinAfterDrag').checked){ d.fx=null; d.fy=null; } if(!event.active) simulation.alphaTarget(0); })
+      );
+      nodeSel = nodeEnter.merge(nodeSel);
+
+      simulation.nodes(nodes);
+      const allLinks = links.map(d=>({source:d.source,target:d.target}))
+        .concat(fails.map(d=>({source:d.source,target:d.target})));
+      simulation.force('link').links(allLinks);
+      simulation.alpha(0.9).restart();
+
+      nodeLayer.selectAll('g.node').select('g.badge').select('text').text(d=> (d.output? d.output.length:0));
+
+      document.getElementById('statNodes').textContent = nodes.length;
+      document.getElementById('statEdges').textContent = links.length;
+      document.getElementById('statFails').textContent = fails.length;
+      document.getElementById('statHits').textContent = hits;
+
+      applyVisToggles();
+      updateActiveNodeVisual();
+    }
+
+    function applyVisToggles(){
+      const showT=document.getElementById('showTrans').checked;
+      const showF=document.getElementById('showFail').checked;
+      linkLayer.style('display', showT? 'block':'none');
+      labelLayer.style('display', showT? 'block':'none');
+      failLayer.style('display', showF? 'block':'none');
+    }
+
+    function ticked(){
+      linkSel.attr('x1', d=> nodeById.get(d.source).x)
+        .attr('y1', d=> nodeById.get(d.source).y)
+        .attr('x2', d=> nodeById.get(d.target).x)
+        .attr('y2', d=> nodeById.get(d.target).y);
+      failSel.attr('x1', d=> nodeById.get(d.source).x)
+        .attr('y1', d=> nodeById.get(d.source).y)
+        .attr('x2', d=> nodeById.get(d.target).x)
+        .attr('y2', d=> nodeById.get(d.target).y);
+      labSel.attr('x', d=> (nodeById.get(d.source).x + nodeById.get(d.target).x)/2 )
+        .attr('y', d=> (nodeById.get(d.source).y + nodeById.get(d.target).y)/2 - 8 );
+      nodeSel.attr('transform', d=>`translate(${d.x},${d.y})`);
+    }
+
+    // ====== 细节面板 ======
+    function showDetail(id){
+      const n=ac.nodes.find(x=>x.id===id); if(!n) return;
+      const el=document.getElementById('statedetail'); el.innerHTML='';
+      const h=document.createElement('div'); h.innerHTML=`<strong>state ${n.id}</strong>  char='${n.char||'(root)'}'  depth=${n.depth}`; el.appendChild(h);
+      const f=document.createElement('div'); f.style.marginTop='6px'; const fid=n.fail? n.fail.id: 'null'; f.innerHTML=`<strong>fail</strong>: ${fid}`; el.appendChild(f);
+      const o=document.createElement('div'); o.style.marginTop='6px'; o.innerHTML=`<strong>输出</strong>: ${n.output.length? n.output.join(', '): '(空)'}`; el.appendChild(o);
+      const path=[]; let cur=n; while(cur && cur!==ac.root){ path.push(cur.char); cur = Object.values(ac.nodes).find(p => Object.values(p.children||{}).includes(cur)); }
+      const p=document.createElement('div'); p.style.marginTop='6px'; p.innerHTML=`<strong>路径样例</strong>: ${path.length? path.reverse().join(''): '(root)'} `; el.appendChild(p);
+    }
+
+    function updateActiveNodeVisual(){
+      nodeLayer.selectAll('g.node').classed('active', d=> curNode && d.id===curNode.id);
+    }
+
+    // ====== 日志与公共 UI ======
+    function appendLog(lines){ const el=document.getElementById('log'); lines.forEach(l=>{ const p=document.createElement('div'); p.textContent=l; el.appendChild(p); }); el.scrollTop=el.scrollHeight; }
+    function clearLog(){ document.getElementById('log').innerHTML=''; }
+
+    // ====== 构建阶段 ======
+    function build(){
+      const patStr=document.getElementById('patterns').value||'';
+      const patterns=patStr.split(',').map(s=>s.trim()).filter(Boolean);
+      if(!patterns.length){ alert('请提供至少一个有效的模式串'); return; }
+
+      if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+      autoPlaying=false; document.getElementById('btnAuto').textContent='自动播放';
+      hits=0; stepIndex=0; matchIdx=0; phase='fail'; curNode=null;
+
+      ac=new AC();
+      for(const p of patterns) ac.insert(p);
+      steps=ac.buildFailSteps();
+      appendLog([`构建完成：节点=${ac.nodes.length}, 转移=${ac.links.length}。开始分步计算 Fail（共 ${steps.length} 步）。`]);
+      rebuild(); setCenterForce();
+      document.getElementById('matchResult').textContent='';
+    }
+
+    function nextStep(){
+      if(!ac){ alert('请先构建自动机'); return; }
+      if(phase==='fail'){
+        if(stepIndex>=steps.length){ phase='match'; curNode=ac.root; appendLog(['Fail 指针构造完毕，进入匹配阶段']); return; }
+        const info=ac.doFailStep(steps[stepIndex++]); appendLog([info.desc]); rebuild();
+      } else if(phase==='match'){
+        doMatchStep();
+      } else {
+        alert('请先构建自动机');
+      }
+    }
+
+    function autoPlay(){
+      if(!ac){ alert('请先构建自动机'); return; }
+      if(autoPlaying){ clearInterval(autoTimer); autoTimer=null; autoPlaying=false; document.getElementById('btnAuto').textContent='自动播放'; return; }
+      autoPlaying=true; document.getElementById('btnAuto').textContent='停止';
+      autoTimer=setInterval(()=>{
+        if(phase==='fail' && stepIndex<steps.length){ nextStep(); return; }
+        if(phase==='fail' && stepIndex>=steps.length){ phase='match'; curNode=ac.root; appendLog(['Fail 指针构造完毕，进入匹配阶段']); return; }
+        if(phase==='match'){
+          const done = !doMatchStep();
+          if(done){ clearInterval(autoTimer); autoTimer=null; autoPlaying=false; document.getElementById('btnAuto').textContent='自动播放'; appendLog(['匹配阶段完成']); }
+        }
+      }, 700);
+    }
+
+    // ====== 匹配阶段 ======
+    function resetMatch(){ if(!ac) return; matchIdx=0; curNode=null; hits=0; document.getElementById('matchResult').textContent=''; rebuild(); }
+
+    function doMatchStep(){
+      const text=document.getElementById('text').value||'';
+      if(text.length===0){ alert('请输入文本串'); return false; }
+      if(matchIdx===0 && !curNode) curNode=ac.root;
+      if(matchIdx>=text.length){ appendLog(['匹配结束']); return false; }
+      const ch=text[matchIdx];
+      let parent=curNode;
+      while(parent && !parent.children[ch]) parent=parent.fail;
+      curNode = parent? parent.children[ch] : ac.root;
+      matchIdx++;
+      if(curNode.output.length){ hits += curNode.output.length; appendLog([`匹配到：${curNode.output.join(', ')} @ i=${matchIdx}`]); }
+      document.getElementById('matchResult').textContent = `进度 ${matchIdx}/${text.length}，当前字符 '${ch}'，当前状态=${curNode.id}${curNode.output.length? `；命中 [${curNode.output.join(', ')}]`:''}`;
+      rebuild();
+      return true;
+    }
+
+    // ====== 事件绑定 ======
+    document.getElementById('btnBuild').addEventListener('click', build);
+    document.getElementById('btnNext').addEventListener('click', nextStep);
+    document.getElementById('btnAuto').addEventListener('click', autoPlay);
+    document.getElementById('btnMatchStep').addEventListener('click', ()=>{ if(phase!=='match'){ alert('请先完成 Fail 构造'); return; } doMatchStep(); });
+    document.getElementById('btnMatchRun').addEventListener('click', ()=>{ if(phase!=='match'){ alert('请先完成 Fail 构造'); return; } while(doMatchStep()){} });
+    document.getElementById('btnMatchReset').addEventListener('click', resetMatch);
+
+    document.getElementById('text').addEventListener('input', ()=>{ if(phase==='match') resetMatch(); });
+
+    document.getElementById('showTrans').addEventListener('change', applyVisToggles);
+    document.getElementById('showFail').addEventListener('change', applyVisToggles);
+    document.getElementById('btnRelayout').addEventListener('click', ()=>{ simulation.alpha(1).restart(); });
+    document.getElementById('btnUnfix').addEventListener('click', ()=>{ nodeById.forEach(n=>{ n.fx=null; n.fy=null; }); appendLog(['释放所有固定位置']); });
+
+    document.getElementById('btnClearLog').addEventListener('click', clearLog);
+    document.getElementById('btnCopyLog').addEventListener('click', async ()=>{ const el=document.getElementById('log'); const text=Array.from(el.querySelectorAll('div')).map(d=>d.textContent).join('\n'); try{ await navigator.clipboard.writeText(text); appendLog(['[提示] 日志已复制到剪贴板']); } catch{ appendLog(['[提示] 复制失败']); } });
+
+    window.addEventListener('resize', ()=>{ setCenterForce(); simulation.alpha(0.3).restart(); });
+
+    document.getElementById('statNodes').textContent='0';
+    document.getElementById('statEdges').textContent='0';
+    document.getElementById('statFails').textContent='0';
+    document.getElementById('statHits').textContent='0';
+  </script>
+</body>
+</html>
