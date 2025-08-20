@@ -1,0 +1,165 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>yzl_lec</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/white.css">
+    <link rel="stylesheet" href="plugin/highlight/zenburn.css">
+    <link rel="stylesheet" href="src/mysetting.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h1>yzl_lec6</h1>
+                date: 25.08.22
+            </section>
+
+            <section>
+                <h2>课程大纲</h2>
+                <li>笛卡尔树</li>
+            </section>
+
+            <section>
+                <section>
+                    <h2>笛卡尔树的思想</h2>
+                </section>
+                <section>
+                    <h3>最值分治</h3>
+                    <p>笛卡尔树，与其说是一种数据结构，不如说是一个简单的思想：</p>
+                    <li>对于一个序列，我可以找到其中最值的位置（不妨最小值，如有多个可以认为下标是第二关键字）；</li>
+                    <li>在这个位置将序列一分为二，分别处理左边的序列、右边的序列；</li>
+                    <li>合并两边的信息。（从数据结构的角度看，分别作为左子树、右子树。）</li>
+                </section>
+                <section>
+                    <h3>例子</h3>
+                    <p>
+                        比如说我对一个序列上的任意一个区间 $[l,r]$ 都有某种约束。
+                        而选中一个点 $x$，这些区间就能划分成下面三类：
+                    </p>
+                    <li>跨越 $x$ 的；</li>
+                    <li>右端点小于 $x$ 的；</li>
+                    <li>左端点大于 $x$ 的。</li>
+                    <p>
+                        上面所说的某种约束，一般是和区间最值相关的东西。
+                        和常规的均分分治相比，为了保证时间复杂度，对于信息的合并，一般也会更为特殊。
+                    </p>
+                </section>
+                <section>
+                    <h3>扩展</h3>
+                    <p>
+                        实际上最值分治不仅仅是可以作用于序列。对于无根树，我也可以每次选取最小值作为根，然后以此将问题分裂成它的若干个子树的问题。
+                    </p>
+                    <p>
+                        序列可以看成是一条链，所以也可以说是树的特例。
+                    </p>
+                </section>
+            </section>
+
+            <section>
+                <section>
+                    <h2>笛卡尔树的技术</h2>
+                </section>
+                <section>
+                    <h3>面临的通用问题</h3>
+                    <li>怎么找这么多区间的最值的位置？</li>
+                    <li>在树上合并两个信息时，如果时间和其中一个子树中的点数相关？</li>
+
+
+                </section>
+                <section>
+                    <h3>建树算法</h3>
+                    <p>显式建出这样一棵树，考虑这样的算法：</p>
+                    <li>假设 $[1,n-1]$ 的树已经建好，看一下加入 $n$ 位置的点会对树造成什么影响；</li>
+                    <li>向左找到第一个比它小的位置 $p$；</li>
+                    <li>把 $n$ 连到 $p$ 的右子树上；</li>
+                    <li>$[p+1,n-1]$ 的相对结构不变，连到 $n$ 的左子树上。</li>
+                    <p>
+                        时间复杂度？
+                    </p>
+                </section>
+                <section>
+                    <h3>附加性质</h3>
+                    <p>
+                        这棵树其实还有一些其它的作用。
+                    </p>
+                    <li>一个区间内的元素，在这棵树上的位置分布？</li>
+                    <li>区间的最小值在哪个位置？</li>
+                    <li>给定 $p$，则包含 $p$ 且元素值均 $\ge a_p$ 的区间长度最大值？</li>
+
+                </section>
+
+                <section>
+                    <h3>启发式合并</h3>
+                    <p>
+                        对于 $n$ 个大小为 $1$ 的集合。考虑它们的两两合并，记大小为 $x\le y$。
+                        如果每次合并能用 $O(x)$ 的复杂度完成，则直到它们完全合并，
+                        总合并时间也不会超过 $O(n \log n)$。
+                    </p>
+                    <p>
+                        如果需要借助一点数据结构来合并信息，如可能需要 $O(x\cdot f(n))$ 合并，也只不过是 $O(n\log n\cdot f(n))$。
+                        一般 $f(n) = O(\log n)$。
+                    </p>
+                    <p>
+                        特例：根据树的结构合并它们。
+                    </p>
+                </section>
+            </section>
+
+        </div>
+    </div>
+    <!-- 用户文件截止 -->
+
+
+
+
+
+
+
+
+
+    <!-- 主库 -->
+    <script src="dist/reveal.js"></script>
+
+    <!-- 插件 -->
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/search/search.js"></script>
+    <!-- <script src="plugin/fullscreen/fullscreen.js"></script> -->
+    <!-- <script src="plugin/menu/menu.js"></script> -->
+    <script src="plugin/math/math.js"></script>
+    <!-- <script src="plugin/autoanimate/autoanimate.js"></script> -->
+
+    <script src="plugin/reveald3.js"></script>
+
+    <!-- 初始化 -->
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            controls: true,
+            progress: true,
+            center: true,
+            plugins: [
+                RevealMarkdown,
+                RevealHighlight,
+                RevealNotes,
+                RevealZoom,
+                RevealSearch,
+                // RevealFullscreen,
+                // RevealMenu,
+                RevealMath,
+                // RevealAutoAnimate
+                Reveald3,
+            ]
+        });
+    </script>
+</body>
+
+</html>
