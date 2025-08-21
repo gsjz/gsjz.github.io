@@ -32,6 +32,8 @@ nav:
       - 算法可视化:
         - AC 自动机: XCPC/模板与课件/算法可视化/AC-automaton.html
         - 后缀自动机: XCPC/模板与课件/算法可视化/suffix-automaton.html
+        - Dinic 最大流: XCPC/模板与课件/算法可视化/Dinic-flow.html
+        - Dijkstra 费用流: XCPC/模板与课件/算法可视化/Dijkstra-cost-flow.html
         - 草稿: XCPC/模板与课件/算法可视化/draft.html
       - 家教记录: 
         - yzl_lec1: XCPC/模板与课件/reveal.js/yzl_lec1.html
