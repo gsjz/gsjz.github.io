@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>Suffix Automaton (SAM) 可视化演示 — 带 endpos / 等价类（改进版）</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{--accent:#1f77b4}
+    body{margin:0;font-family:system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans CJK', sans-serif; display:flex; height:100vh}
+    /* 左侧画布 */
+    #stage{flex:1; position:relative; background:#fafafa;}
+    svg{width:100%;height:100%}
+
+    /* 顶部控制 */
+    header.controls{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:rgba(255,255,255,0.98);padding:12px 20px;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.10);z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+    header.controls label{margin-right:8px;font-size:13px;display:flex;align-items:center;gap:6px}
+    header.controls input[type=text]{padding:8px 10px;margin:0 6px 0 3px;border:1px solid #ddd;border-radius:6px;font-size:13px}
+    header.controls button{margin-left:0;padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px}
+    header.controls .small{grid-column:1/-1}
+    header.controls label{margin-right:8px;font-size:13px}
+    header.controls input[type=text]{padding:6px;margin:0 6px 0 3px;border:1px solid #ddd;border-radius:4px}
+    header.controls button{margin-left:6px;padding:6px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer}
+
+    /* 右侧面板 */
+    #sidebar{width:380px;border-left:1px solid #e6e6e6;background:#fff;padding:12px;box-sizing:border-box;overflow:auto}
+    #sidebar h3{margin:10px 0 6px;font-size:15px}
+    #log{height:120px;overflow:auto;background:#f7f7f7;padding:8px;border-radius:6px;border:1px solid #eee;font-size:13px}
+    .stat{margin:6px 0;padding:8px;background:#fff;border:1px solid #f0f0f0;border-radius:6px}
+    .small{font-size:13px;color:#666}
+
+    /* ===== 大屏/4K 友好优化 ===== */
+    @media (min-width: 1920px){
+      header.controls{left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.8);backdrop-filter:blur(8px);border:1px solid #e5e7eb;padding:16px 18px;border-radius:14px;gap:12px 14px;grid-template-columns:repeat(8,max-content)}
+      header.controls label{font-size:14px}
+      header.controls input[type=text]{font-size:14px;padding:10px 12px;border-radius:8px}
+      header.controls button{font-size:14px;padding:10px 14px;border-radius:10px}
+    }
+    @media (min-width: 2560px){
+      header.controls{gap:14px 18px;padding:18px 22px;border-radius:16px;grid-template-columns:repeat(10,max-content)}
+      header.controls label{font-size:15px}
+      header.controls input[type=text]{font-size:15px;padding:12px 14px}
+      header.controls button{font-size:15px;padding:12px 16px}
+    }
+
+    /* 节点/边样式 */
+    .node circle{fill:#fff;stroke:#333;stroke-width:1.5px}
+    .node.fixed circle{fill:#ffe4b5}
+    .node text{font-size:12px;pointer-events:none}
+
+    /* normal arrows use currentColor so we can recolor via CSS on the element */
+    .link{stroke:var(--link-color,#333); color:var(--link-color,#333); stroke-width:1.5px; opacity:0.95; marker-end:url(#arrow)}
+    /* 统一通过 CSS 变量设置高亮色，确保箭头与线条一致 */
+    .link.highlight{ --link-color: orange; color:var(--link-color); stroke-width:3px; marker-end:url(#arrow-highlight); }
+
+    .suflink{stroke:var(--suf-color,#d33); color:var(--suf-color,#d33); stroke-dasharray:5 4; stroke-width:1.5px; opacity:0.9; marker-end:url(#sufArrow)}
+    .suflink.highlight{ --suf-color: #ffd700; color:var(--suf-color); stroke-width:3px; marker-end:url(#sufArrow-highlight); }
+
+    .edgelabel{font-size:12px;pointer-events:none;fill:#000;paint-order:stroke;stroke:#fff;stroke-width:3px}
+    .edgelabel.highlight{ fill:currentColor; font-weight:700; }
+
+    .badge { pointer-events: none; }
+    .badge circle { fill: var(--accent); }
+    .badge text { font-size:11px; fill: white; font-weight:600; text-anchor:middle; dominant-baseline:central; }
+
+    .highlight{stroke:orange !important;stroke-width:3px}
+    .matched circle{fill:gold}
+
+    /* state detail */
+    #statedetail{height:260px;overflow:auto;border-radius:6px;border:1px solid #eee;padding:8px;background:#fafafa}
+    #statedetail pre{white-space:pre-wrap;font-size:13px}
+
+    .small-btn{padding:4px 8px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;margin-left:6px}
+
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <header class="controls">
+      <label>构建串：<input id="buildInput" type="text" value="ababa" /></label>
+      <button id="btnPrepare">准备构建</button>
+      <button id="btnStep">下一步</button>
+      <button id="btnAuto">自动播放</button>
+      <label style="margin-left:8px"><input id="showTrans" type="checkbox" checked /> 显示转移</label>
+      <label><input id="showSuf" type="checkbox" checked /> 显示后缀链接</label>
+      <label style="margin-left:8px"><input id="pinAfterDrag" type="checkbox" checked /> 拖拽后固定</label>
+      <label style="margin-left:8px"><input id="enableAdjust" type="checkbox" /> 启用调整模式（拖动节点以调整位置；禁用点击显示）</label>
+      <button id="btnRelayout" title="重新启动力导向">重排</button>
+      <button id="btnUnfix">释放固定</button>
+    </header>
+    <svg id="svg"></svg>
+  </div>
+
+  <div id="sidebar">
+    <h3>构造过程日志
+      <button id="btnClearLog" class="small-btn" style="margin-left:8px">清空</button>
+      <button id="btnCopyLog" class="small-btn">复制</button>
+    </h3>
+    <div id="log"></div>
+
+    <h3>节点详情（点击图中节点）</h3>
+    <div id="statedetail"><em>点击某个节点查看 endpos、区间/等价类示例（在调整模式下点击无效）。</em></div>
+
+    <h3>交互操作</h3>
+    <div class="stat">
+      <div><label>查询串：<input id="queryInput" type="text" placeholder="例如：aba" /></label>
+      <button id="btnMatch">匹配</button></div>
+      <div id="matchResult" class="small" style="margin-top:6px"></div>
+    </div>
+
+    <h3>实时统计</h3>
+    <div class="stat">
+      <div>状态数（nodes）：<span id="statNodes">0</span></div>
+      <div>转移数（edges）：<span id="statEdges">0</span></div>
+      <div>不同子串个数：<span id="statSubstr">0</span></div>
+    </div>
+
+    <h3>SAM 的常见应用</h3>
+    <ul>
+      <li>判断一个串是否为另一个串的子串（O(|query|))</li>
+      <li>统计不同子串的个数（通过状态的 len - link.len 求和）</li>
+      <li>求两个串的最长公共子串（把第二个串跑在第一个的 SAM 上）</li>
+      <li>在线子串出现次数/位置（需要拓展后缀自动机，或结合后缀树/后续处理）</li>
+    </ul>
+
+    <div id="tips">提示：先按 "准备构建"，然后点击 "下一步" 逐字符构建；或点击 "自动播放" 自动演示。勾选“启用调整模式”以用鼠标调整节点位置（此模式会禁用点击显示节点详情以避免冲突）。</div>
+  </div>
+
+  <script>
+    // ====== d3 & svg 初始化 ======
+    const svg = d3.select('#svg');
+    const rootG = svg.append('g');
+
+    // 只允许在空白区域平移，滚轮缩放全局允许；禁用双击缩放
+    const zoom = d3.zoom()
+      .scaleExtent([0.2,3])
+      .filter((event) => {
+        if (event.type === 'wheel') return true; // 滚轮缩放允许
+        const t = event.target;
+        const isOnNode = !!(t.closest && t.closest('.node'));
+        const isOnLabel = !!(t.closest && t.closest('.edgelabel'));
+        return !(isOnNode || isOnLabel); // 在节点/标签上不触发平移
+      })
+      .on('zoom', (event)=>rootG.attr('transform', event.transform));
+    svg.call(zoom).on('dblclick.zoom', null);
+
+    const defs = svg.append('defs');
+    // normal arrow uses currentColor so marker color matches stroke/currentColor of the element
+    defs.append('marker').attr('id','arrow').attr('viewBox','0 -5 10 10').attr('refX',16).attr('refY',0).attr('markerWidth',8).attr('markerHeight',8).attr('orient','auto').append('path').attr('d','M0,-5L10,0L0,5').attr('fill','currentColor');
+    // highlight marker: fixed yellow fill so triangle matches highlighted color
+    defs.append('marker').attr('id','arrow-highlight').attr('viewBox','0 -5 12 12').attr('refX',18).attr('refY',0).attr('markerWidth',10).attr('markerHeight',10).attr('orient','auto').append('path').attr('d','M0,-5L12,0L0,5').attr('fill','orange');
+
+    defs.append('marker').attr('id','sufArrow').attr('viewBox','0 -5 10 10').attr('refX',16).attr('refY',0).attr('markerWidth',8).attr('markerHeight',8).attr('orient','auto').append('path').attr('d','M0,-5L10,0L0,5').attr('fill','currentColor');
+    // highlight suf marker: fixed yellow fill
+    defs.append('marker').attr('id','sufArrow-highlight').attr('viewBox','0 -5 12 12').attr('refX',18).attr('refY',0).attr('markerWidth',10).attr('markerHeight',10).attr('orient','auto').append('path').attr('d','M0,-5L12,0L0,5').attr('fill','#ffd700');
+
+    const linkLayer = rootG.append('g').attr('class','links');
+    const sufLayer = rootG.append('g').attr('class','suflinks');
+    const labelLayer = rootG.append('g').attr('class','labels');
+    const nodeLayer = rootG.append('g').attr('class','nodes');
+
+    let linkSel = linkLayer.selectAll('line');
+    let sufSel = sufLayer.selectAll('line');
+    let labSel = labelLayer.selectAll('text');
+    let nodeSel = nodeLayer.selectAll('g');
+
+    // pointer 点击 vs 拖动 阈值（用于更稳的点击判定）
+    const CLICK_TOL = 3; // 像素
+    let _lastDown = null;
+    svg.on('pointerdown', (event)=>{ _lastDown = { x: event.clientX, y: event.clientY }; });
+    svg.on('pointerup', ()=>{ _lastDown = null; });
+
+    // ====== SAM 数据结构（记录 pos, firstPos） ======
+    class SAM {
+      constructor(){ this.states=[{len:0,link:-1,next:{},id:0,firstPos:-1}]; this.last=0; this.posState=[]; }
+      extend(ch,pos){
+        const ops = [];
+        const cur = this.states.length;
+        this.states.push({len:this.states[this.last].len+1, link:0, next:{}, id:cur, firstPos:pos});
+        this.posState.push(cur);
+        ops.push(`创建状态 ${cur} (len=${this.states[cur].len}, firstPos=${pos})`);
+        let p = this.last;
+        while(p!=-1 && !(ch in this.states[p].next)){
+          this.states[p].next[ch]=cur;
+          ops.push(`添加转移: ${p} -'${ch}'-> ${cur}`);
+          p = this.states[p].link;
+        }
+        if (p==-1){
+          this.states[cur].link = 0; ops.push(`设置后缀链接: ${cur} -> 0`);
+        } else {
+          const q = this.states[p].next[ch];
+          if (this.states[p].len + 1 === this.states[q].len){
+            this.states[cur].link = q; ops.push(`设置后缀链接: ${cur} -> ${q}`);
+          } else {
+            const clone = this.states.length;
+            // clone q
+            this.states.push({len:this.states[p].len+1, link:this.states[q].link, next:Object.assign({}, this.states[q].next), id:clone, firstPos:this.states[q].firstPos});
+            ops.push(`创建 clone ${clone}（来自 ${q}），len=${this.states[clone].len}`);
+            while(p!=-1 && this.states[p].next[ch]===q){
+              this.states[p].next[ch]=clone;
+              ops.push(`重定向转移: ${p} 的 '${ch}' 从 ${q} -> ${clone}`);
+              p = this.states[p].link;
+            }
+            this.states[q].link = this.states[cur].link = clone;
+            ops.push(`设置后缀链接: ${q} -> ${clone}; ${cur} -> ${clone}`);
+          }
+        }
+        this.last = cur;
+        return ops;
+      }
+    }
+
+    // ====== 可视化辅助与状态 ======
+    let sam = null, buildChars = [], stepIndex = 0, autoTimer = null, autoPlaying = false;
+    const nodeById = new Map();
+
+    function computeGraphData(){
+      const nodes = sam.states.map(s=>({id:s.id,len:s.len,link:s.link,firstPos:s.firstPos}));
+      const links = [];
+      sam.states.forEach(s=>{
+        for (const [ch,to] of Object.entries(s.next)) links.push({source:s.id,target:to,ch});
+      });
+      const suflinks = sam.states.filter(s=>s.link!==-1).map(s=>({source:s.id,target:s.link}));
+      return {nodes,links,suflinks};
+    }
+
+    // 计算 endpos 集合（有限展示）
+    function computeEndpos(){
+      const n = sam.posState.length;
+      const endpos = Array.from({length: sam.states.length}, ()=>[]);
+      for (let i=0;i<n;i++){ const st = sam.posState[i]; endpos[st].push(i+1); }
+      // propagate by len desc
+      const order = Array.from({length: sam.states.length}, (_,i)=>i).sort((a,b)=>sam.states[b].len - sam.states[a].len);
+      for (const v of order){ const link = sam.states[v].link; if (link!=-1){ endpos[link] = endpos[link].concat(endpos[v]); } }
+      // unique & sort
+      for (let i=0;i<endpos.length;i++){ const arr = Array.from(new Set(endpos[i])).sort((a,b)=>a-b); endpos[i] = arr; }
+      sam.endpos = endpos;
+    }
+
+    // 将 positions 数组合并成区间数组
+    function compressToRanges(posArr){
+      if (!posArr || posArr.length===0) return [];
+      const ranges = [];
+      let start = posArr[0], end = posArr[0];
+      for (let i=1;i<posArr.length;i++){
+        const v = posArr[i];
+        if (v === end + 1) end = v; else { ranges.push([start,end]); start = v; end = v; }
+      }
+      ranges.push([start,end]);
+      return ranges;
+    }
+
+    // 统计不同子串数
+    function calcDistinctSubstrings(){
+      let sum=0; for (let i=1;i<sam.states.length;i++){ const st=sam.states[i]; const linkLen = (st.link===-1)?0:sam.states[st.link].len; sum += st.len - linkLen; } return sum;
+    }
+
+    // 力导向布局
+    const simulation = d3.forceSimulation()
+      .force('link', d3.forceLink().id(d=>d.id).distance(130).strength(1))
+      .force('charge', d3.forceManyBody().strength(-600))
+      // center 力在初始化后按容器尺寸设置
+      .on('tick', ticked);
+
+    function getCanvasSize(){
+      const el = document.getElementById('svg');
+      const rect = el.getBoundingClientRect();
+      return { w: rect.width, h: rect.height };
+    }
+    function setCenterForce(){
+      const { w, h } = getCanvasSize();
+      simulation.force('center', d3.forceCenter(w/2, h/2));
+    }
+    // 初始化立即设置中心
+    setCenterForce();
+
+    function rebuild(){
+      computeEndpos();
+      const {nodes,links,suflinks} = computeGraphData();
+
+      // map old node positions to new nodes
+      nodes.forEach(n=>{ const old=nodeById.get(n.id); if (old){ n.x=old.x; n.y=old.y; n.fx=old.fx; n.fy=old.fy; } nodeById.set(n.id,n); });
+
+      // join links
+      linkSel = linkLayer.selectAll('line.link').data(links, d=>`${d.source}->${d.target}@${d.ch}`);
+      linkSel.exit().remove();
+      const linkEnter = linkSel.enter().append('line').attr('class','link');
+      linkSel = linkEnter.merge(linkSel);
+
+      // join suffix links
+      sufSel = sufLayer.selectAll('line.suflink').data(suflinks, d=>`suf${d.source}->${d.target}`);
+      sufSel.exit().remove();
+      const sufEnter = sufSel.enter().append('line').attr('class','suflink');
+      sufSel = sufEnter.merge(sufSel);
+
+      // edge labels
+      labSel = labelLayer.selectAll('text.edgelabel').data(links, d=>`${d.source}->${d.target}@${d.ch}`);
+      labSel.exit().remove();
+      const labEnter = labSel.enter().append('text').attr('class','edgelabel').text(d=>d.ch);
+      labSel = labEnter.merge(labSel);
+
+      // nodes
+      nodeSel = nodeLayer.selectAll('g.node').data(nodes, d=>d.id);
+      nodeSel.exit().remove();
+      const nodeEnter = nodeSel.enter().append('g')
+        .attr('class','node')
+        // 防止在节点按下时冒泡到 svg，触发背景平移
+        .on('pointerdown', (event)=> event.stopPropagation())
+        .on('mousedown', (event)=> event.stopPropagation())
+        .on('touchstart', (event)=> event.stopPropagation())
+        .on('click', (event,d)=>{
+          // 如果处于调整模式或发生了真实拖动，不打开详情
+          if (document.getElementById('enableAdjust').checked) return;
+          if (_lastDown){
+            const dx = event.clientX - _lastDown.x;
+            const dy = event.clientY - _lastDown.y;
+            if (dx*dx + dy*dy > CLICK_TOL*CLICK_TOL) return; // 轻微抖动保护
+          }
+          if (d._dragMoved) { d._dragMoved = false; return; }
+          showStateDetail(d.id);
+        })
+        .style('cursor','pointer');
+
+      nodeEnter.append('circle').attr('r',20);
+      nodeEnter.append('text').attr('dy',4).attr('text-anchor','middle').text(d=>d.id);
+      // badge: endpos count
+      const badge = nodeEnter.append('g').attr('class','badge').attr('transform','translate(14,-14)');
+      badge.append('circle').attr('r',10);
+      badge.append('text').attr('dy',0);
+
+      const DRAG_CLICK_TOL = 3; // 像素阈值
+      // attach drag behavior (拖拽仅在调整模式启用)
+      nodeEnter.call(d3.drag()
+        .on('start', (event,d)=>{
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d._dragMoved = false;
+          d._dragStart = { x: d.x, y: d.y };
+          if (document.getElementById('enableAdjust').checked){ d.fx = d.x; d.fy = d.y; }
+        })
+        .on('drag', (event,d)=>{
+          if (!document.getElementById('enableAdjust').checked) return;
+          d.fx = event.x; d.fy = event.y;
+          if (!d._dragMoved) {
+            const dx = (d.fx - d._dragStart.x) || 0;
+            const dy = (d.fy - d._dragStart.y) || 0;
+            if (dx*dx + dy*dy > DRAG_CLICK_TOL*DRAG_CLICK_TOL) d._dragMoved = true;
+          }
+        })
+        .on('end', (event,d)=>{
+          if (!document.getElementById('enableAdjust').checked){ if (!event.active) simulation.alphaTarget(0); return; }
+          // 调整模式下，按勾选决定是否固定
+          if (!document.getElementById('pinAfterDrag').checked){ d.fx = null; d.fy = null; }
+          if (!event.active) simulation.alphaTarget(0);
+        })
+      );
+
+      nodeSel = nodeEnter.merge(nodeSel);
+
+      // update simulation
+      simulation.nodes(nodes);
+      const allLinks = links.map(d=>({source:d.source,target:d.target}))
+        .concat(suflinks.map(d=>({source:d.source,target:d.target})));
+      simulation.force('link').links(allLinks);
+      simulation.alpha(0.9).restart();
+
+      // 更新徽章文本（避免每帧更新）
+      nodeLayer.selectAll('g.node').select('g.badge').select('text')
+        .text(d => (sam && sam.endpos && sam.endpos[d.id]) ? sam.endpos[d.id].length : 0);
+
+      // update stats
+      document.getElementById('statNodes').textContent = nodes.length;
+      document.getElementById('statEdges').textContent = links.length;
+      document.getElementById('statSubstr').textContent = calcDistinctSubstrings();
+
+      applyVisToggles();
+    }
+
+    function applyVisToggles(){
+      const showT = document.getElementById('showTrans').checked;
+      const showS = document.getElementById('showSuf').checked;
+      linkLayer.style('display', showT ? 'block' : 'none');
+      labelLayer.style('display', showT ? 'block' : 'none');
+      sufLayer.style('display', showS ? 'block' : 'none');
+    }
+
+    function ticked(){
+      linkSel.attr('x1', d=> nodeById.get(d.source).x)
+        .attr('y1', d=> nodeById.get(d.source).y)
+        .attr('x2', d=> nodeById.get(d.target).x)
+        .attr('y2', d=> nodeById.get(d.target).y);
+      sufSel.attr('x1', d=> nodeById.get(d.source).x)
+        .attr('y1', d=> nodeById.get(d.source).y)
+        .attr('x2', d=> nodeById.get(d.target).x)
+        .attr('y2', d=> nodeById.get(d.target).y);
+      labSel.attr('x', d=> (nodeById.get(d.source).x + nodeById.get(d.target).x)/2 )
+        .attr('y', d=> (nodeById.get(d.source).y + nodeById.get(d.target).y)/2 - 8 );
+      nodeSel.attr('transform', d=>`translate(${d.x},${d.y})`);
+    }
+
+    // ====== 日志与 UI ======
+    function appendLog(lines){ const el = document.getElementById('log'); lines.forEach(l=>{ const p=document.createElement('div'); p.textContent = l; el.appendChild(p); }); el.scrollTop = el.scrollHeight; }
+    function clearLog(){ document.getElementById('log').innerHTML = ''; }
+
+    // ====== 节点详情：使用区间展示 + 可选枚举示例 ======
+    function showStateDetail(id){
+      if (!sam) return; const st = sam.states[id];
+      const endpos = sam.endpos ? sam.endpos[id] : [];
+      const linkLen = st.link===-1?0:sam.states[st.link].len;
+      const minL = linkLen+1, maxL = st.len;
+      const s = document.getElementById('buildInput').value || '';
+
+      // sample substrings
+      const substrSet = new Set();
+      const maxEnumerate = 20000; // avoid heavy work
+      const totalOps = endpos.length * (maxL - minL + 1);
+      let enumerated = false;
+      if (totalOps <= maxEnumerate && s.length <= 200) {
+        for (const ep of endpos){
+          for (let L=minL; L<=maxL; L++){
+            const stIdx = ep - L; if (stIdx < 0) continue;
+            const sub = s.substring(stIdx, stIdx+L);
+            substrSet.add(sub);
+          }
+        }
+        enumerated = true;
+      }
+
+      // render
+      const el = document.getElementById('statedetail'); el.innerHTML = '';
+      const h = document.createElement('div'); h.innerHTML = `<strong>state ${id}</strong>  len=${st.len}  link=${st.link}  firstPos=${st.firstPos}`;
+      el.appendChild(h);
+
+      const epDiv = document.createElement('div'); epDiv.style.marginTop='6px';
+      epDiv.innerHTML = `<strong>endpos</strong> (count=${endpos.length})`;
+      el.appendChild(epDiv);
+
+      // 使用区间展示
+      const posRanges = compressToRanges(endpos);
+      const posList = document.createElement('div'); posList.style.marginTop='6px'; posList.style.fontSize='13px';
+      posList.textContent = endpos.length ? posRanges.map(([a,b]) => a===b ? `${a}` : `${a}-${b}`).join(', ') : '(空)';
+      el.appendChild(posList);
+
+      const eq = document.createElement('div'); eq.style.marginTop='6px'; eq.innerHTML = `<strong>等价类的子串长度范围</strong>: [${minL}, ${maxL}]`;
+      el.appendChild(eq);
+
+      const ex = document.createElement('div'); ex.style.marginTop='6px'; ex.innerHTML = `<strong>示例子串</strong>:`; el.appendChild(ex);
+      const ul = document.createElement('ul');
+      if (enumerated){
+        const arr = Array.from(substrSet).slice(0,500);
+        arr.forEach(ss=>{ const li=document.createElement('li'); li.textContent = `"${ss}"`; ul.appendChild(li); });
+        if (substrSet.size > arr.length){ const more=document.createElement('div'); more.textContent = `…（共有 ${substrSet.size} 个不同子串，仅展示前 ${arr.length} 个）`; ex.appendChild(more); }
+      } else {
+        const li=document.createElement('li'); li.textContent = '等价类规模较大，未枚举具体子串（避免耗时）。你可以缩短输入串后重试。'; ul.appendChild(li);
+      }
+      ex.appendChild(ul);
+    }
+
+    // ====== 交互函数 ======
+    document.getElementById('btnPrepare').addEventListener('click', ()=>{
+      const str = document.getElementById('buildInput').value || '';
+      if (!str){ alert('请输入要构建的字符串'); return; }
+
+      // 清理自动播放与高亮
+      if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+      autoPlaying = false;
+      document.getElementById('btnAuto').textContent = '自动播放';
+      clearHighlights();
+
+      sam = new SAM();
+      buildChars = str.split('');
+      stepIndex = 0;
+      nodeById.clear(); clearLog(); appendLog([`开始准备构建，长度 ${buildChars.length}`]);
+      rebuild();
+      setCenterForce();
+    });
+
+    document.getElementById('btnStep').addEventListener('click', ()=>{
+      if (!sam){ alert('先点击“准备构建”'); return; }
+      if (stepIndex >= buildChars.length){
+        appendLog(['构造已完成', `不同子串个数 = ${calcDistinctSubstrings()}`]);
+        return;
+      }
+      const ch = buildChars[stepIndex++];
+      const pos = stepIndex; // 1-based position
+      const ops = sam.extend(ch,pos);
+      appendLog([`插入字符 '${ch}' (pos=${pos}) -> ${ops.length} 条操作：`]); appendLog(ops);
+      rebuild();
+    });
+
+    document.getElementById('btnAuto').addEventListener('click', ()=>{
+      if (!sam){ alert('先点击“准备构建”'); return; }
+      if (autoPlaying){ if (autoTimer) clearInterval(autoTimer); autoPlaying=false; document.getElementById('btnAuto').textContent='自动播放'; return; }
+      autoPlaying = true; document.getElementById('btnAuto').textContent='停止';
+      autoTimer = setInterval(()=>{
+        if (stepIndex >= buildChars.length){
+          clearInterval(autoTimer); autoTimer=null; autoPlaying=false; document.getElementById('btnAuto').textContent='自动播放'; appendLog(['自动播放结束', `不同子串个数 = ${calcDistinctSubstrings()}`]); return;
+        }
+        document.getElementById('btnStep').click();
+      }, 700);
+    });
+
+    document.getElementById('showTrans').addEventListener('change', ()=>{ applyVisToggles(); });
+    document.getElementById('showSuf').addEventListener('change', ()=>{ applyVisToggles(); });
+    document.getElementById('btnRelayout').addEventListener('click', ()=>{ simulation.alpha(1).restart(); });
+    document.getElementById('btnUnfix').addEventListener('click', ()=>{ nodeById.forEach(n=>{ n.fx=null; n.fy=null; }); appendLog(['释放所有固定位置']); });
+
+    document.getElementById('btnClearLog').addEventListener('click', clearLog);
+    document.getElementById('btnCopyLog').addEventListener('click', async ()=>{
+      const el = document.getElementById('log');
+      const text = Array.from(el.querySelectorAll('div')).map(d=>d.textContent).join('\n');
+      try { await navigator.clipboard.writeText(text); appendLog(['[提示] 日志已复制到剪贴板']); }
+      catch { appendLog(['[提示] 复制失败，可能不支持剪贴板 API']); }
+    });
+
+    // 匹配查询
+    function clearHighlights(){ linkLayer.selectAll('line').classed('highlight',false); sufLayer.selectAll('line').classed('highlight',false); labelLayer.selectAll('text').classed('highlight',false); nodeLayer.selectAll('g').classed('matched',false); document.getElementById('matchResult').textContent=''; }
+    document.getElementById('btnMatch').addEventListener('click', ()=>{
+      if (!sam){ alert('先构建 SAM'); return; }
+      clearHighlights();
+      const q = document.getElementById('queryInput').value || '';
+      if (!q){ alert('请输入查询串'); return; }
+      let p = 0; let ok = true; const visitedEdges = [];
+      for (const ch of q){ if (sam.states[p].next[ch] !== undefined){ const to = sam.states[p].next[ch]; visitedEdges.push({source:p,target:to}); p = to; } else { ok = false; break; } }
+      if (ok){ document.getElementById('matchResult').textContent = `匹配成功，结束状态 ${p}`;
+        nodeLayer.selectAll('g').filter(d=> visitedEdges.some(e=>e.target===d.id)).classed('matched',true);
+        // highlight lines and labels with consistent color/marker
+        linkLayer.selectAll('line').filter(d=> visitedEdges.some(e=> e.source==d.source && e.target==d.target)).classed('highlight',true);
+        labelLayer.selectAll('text').filter(d=> visitedEdges.some(e=> e.source==d.source && e.target==d.target)).classed('highlight',true);
+      }
+      else { document.getElementById('matchResult').textContent = '未匹配（查询串不是构造字符串的子串）'; }
+    });
+
+    // resize handling：用容器实际尺寸更新 center 力
+    window.addEventListener('resize', ()=>{ setCenterForce(); simulation.alpha(0.3).restart(); });
+
+    // 初始空状态
+    document.getElementById('statNodes').textContent = '0';
+    document.getElementById('statEdges').textContent = '0';
+    document.getElementById('statSubstr').textContent = '0';
+
+    // expose for debugging
+    window._sam = ()=>sam;
+  </script>
+</body>
+</html>
