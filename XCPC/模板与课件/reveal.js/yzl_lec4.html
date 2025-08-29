@@ -1,0 +1,399 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>yzl_lec4</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="dist/reveal.css">
+  <link rel="stylesheet" href="dist/theme/white.css">
+  <link rel="stylesheet" href="plugin/highlight/zenburn.css">
+  <link rel="stylesheet" href="src/mysetting.css">
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section>
+        <h1>yzl_lec4</h1>
+        date: 25.08.13
+      </section>
+      <section>
+
+        <h2>课程大纲</h2>
+        <li>拾遗：置换与矩阵乘法</li>
+        <li>Frobenius 硬币问题</li>
+        <li>整数一次不定方程</li>
+
+      </section>
+
+      <section>
+        <section>
+          <h2>置换与矩阵乘法</h2>
+          <p>
+            我们之前讲了一道利用 <strong>置换的结合性、可逆性</strong> 的题目。<br>
+            实际上，置换可以看成是一种特殊的矩阵乘法。
+          </p>
+        </section>
+
+        <section>
+          <h3>矩阵乘法定义</h3>
+          <p>
+            对于矩阵 $A_{n\times m}$ 和矩阵 $B_{m\times p}$，定义它们的乘法得到一个 $C_{n\times p}$ 的矩阵。
+            其中 $C$ 的第 $i$ 行第 $j$ 列的元素由如下求和给出
+            $$
+            C_{i,j} = \sum\limits_{k=1}^{m} A_{i,k}\cdot B_{k,j}
+            $$
+          </p>
+        </section>
+
+        <section>
+          <h3>置换矩阵的定义</h3>
+          <p>
+            每个置换都可以对应一个 <strong>置换矩阵</strong>：<br />
+            这是一个只有 0 和 1 的方阵，每一行和每一列都恰好只有一个 1。<br />
+            以 $M\times v$（矩阵左乘向量）为例，这时
+            $$
+            M_{i,j} = \left[\sigma(j)=i\right]
+            $$
+
+            这样的话，设 $\sigma(v) = v'$，则
+
+            $$
+            v'_{i,1} = \sum\limits_{k}M_{i,k} v_{k,1} = \sum\limits_{k}\left[\sigma(k)=i\right] v_{k,1}
+            $$
+
+          </p>
+        </section>
+
+        <section>
+          <p>
+            例如，置换
+            $ \sigma = \left(\begin{aligned} 1\,2\,3\\ 3\,1\,2\end{aligned} \right) $ 表示 $$1 \to 3,\;2 \to 1,\;3 \to
+            2$$，
+            对应的置换矩阵为：
+          </p>
+          <p>
+            $$
+            P = \begin{bmatrix}
+            0 & 1 & 0 \\
+            0 & 0 & 1 \\
+            1 & 0 & 0
+            \end{bmatrix}
+            $$
+          </p>
+        </section>
+
+        <section>
+          <p>
+            用这个矩阵左乘一个向量 $v = [v_1, v_2, v_3]^T$，结果为：
+          </p>
+          <p>
+            $$
+            \begin{bmatrix}
+            0 & 1 & 0 \\
+            0 & 0 & 1 \\
+            1 & 0 & 0
+            \end{bmatrix}
+            \,v = \begin{bmatrix}
+            v_2 \\
+            v_3 \\
+            v_1
+            \end{bmatrix}
+            $$
+          </p>
+          <p>这正是置换 $\sigma$ 对向量的作用。</p>
+        </section>
+
+        <section>
+          <h3>复合</h3>
+          <p>
+            若干个置换之间的复合，对应若干个置换矩阵的 <strong> 矩阵乘法</strong>。<br>
+            $$
+            \sigma_3(\sigma_2(\sigma_1(v))) \sim M_3\times (M_2\times (M_1\times v))
+            $$
+          </p>
+        </section>
+
+        <section>
+          <h3>结合性</h3>
+          <strong>置换的结合性</strong> 对应矩阵乘法的结合性。
+        </section>
+
+        <section>
+          <h3>矩阵乘法的结合性证明</h3>
+          <div style="font-size: 60%;">
+            <p>令 \(A\) 为 \(n\times m\) 矩阵，\(B\) 为 \(m\times p\) 矩阵，\(C\) 为 \(p\times q\) 矩阵。我们要证明：</p>
+            <p> \[
+              (AB)C = A(BC).
+              \]</p>
+
+            <p>记 \((AB)C\) 在第 \(x\) 行第 \(y\) 列的元素为：</p>
+            <p> \[
+              \bigl((AB)C\bigr)_{x,y}
+              = \sum_{k=1}^{p} (AB)_{x,k}\;C_{k,y}
+              = \sum_{k=1}^{p}\Bigl(\sum_{j=1}^{m} A_{x,j}\,B_{j,k}\Bigr)\;C_{k,y}.
+              \]</p>
+
+            <p>交换求和次序得：</p>
+            <p> \[
+              \bigl((AB)C\bigr)_{x,y}
+              = \sum_{j=1}^{m} A_{x,j}\;\Bigl(\sum_{k=1}^{p} B_{j,k}\,C_{k,y}\Bigr)
+              = \sum_{j=1}^{m} A_{x,j}\,(BC)_{j,y}
+              = \bigl(A(BC)\bigr)_{x,y}.
+              \]</p>
+
+            <p>由于上述等式对所有 \(x=1,\dots,n\)、\(y=1,\dots,q\) 成立，故</p>
+            <p> \[
+              (AB)C = A(BC).
+              \]</p>
+          </div>
+        </section>
+
+
+        <section>
+          <h3>*可逆性</h3>
+          <p>
+            只有 $n\times n$ 且行列式 $\det$ 非零的矩阵才有可逆性。<br />
+            置换矩阵是 $n\times n$ 的，并且行列式是 $1$ 或者 $-1$。所以有可逆性。
+          </p>
+        </section>
+
+      </section>
+
+      <section>
+        <section>
+          <h2>Frobenius 硬币问题</h2>
+        </section>
+        <section>
+          <h3>问题描述</h3>
+          <p>
+            硬币问题要求找出，仅使用指定面额的硬币无法获得的最大金额。例如，仅使用面额为 3 和 5 的硬币无法获得的最大金额是
+            7 单位。对于给定的一组硬币面额，该问题的解称为该组的 Frobenius 数。
+          </p>
+        </section>
+        <section>
+          <h3>Frobenius 数的存在性</h3>
+          <p>
+            如果硬币面额的集合的 $\gcd = g \not= 1$，那么它们只能表示出 $g$ 的倍数，显然可以取出任意大的无法被表示的数。
+          </p>
+          <p>
+            所以剩下要讨论的就是：硬币面额的集合的 $\gcd$ 为 $1$ 的情况。
+            实际上，这种情况 Frobenius 数存在。然而仅仅是这样一个存在性的证明就非常复杂了。
+          </p>
+        </section>
+        <section>
+          <h3>【NOIP 2017 提高组】小凯的疑惑</h3>
+          <p>
+            它研究的是 $n=2$ 种面值均为正整数且 $\gcd = 1$ 的情况。
+            它有一个简单的结论：$a_1\cdot a_2 - a_1 - a_2$。（discovered by James Joseph Sylvester in 1882.）
+          </p>
+          <p>
+            目前没有人类发现 $n \ge 3$ 的简单结论。
+          </p>
+        </section>
+
+        <section>
+          <h3>这个边界点上不可行</h3>
+          <p>反证法，然后用不等式放缩找矛盾。</p>
+        </section>
+
+        <section>
+          <h3>超过这个边界后均可行</h3>
+          <p>若 $\gcd(a_1,a_2)=1$，则</p>
+          <p class="math">
+            $$
+            \forall n \ge (a_1-1)(a_2-1), \quad \exists\;(\rho,\sigma) \text{ 满足：}
+            $$
+          </p>
+          <ul>
+            <li class="math">$\rho\ge 0, \sigma\ge 0$</li>
+            <li class="math">$n = \rho a_1 + \sigma a_2$</li>
+          </ul>
+        </section>
+
+        <section>
+            <li>设 $n \ge (a_1-1)(a_2-1)$。</li>
+            <li>因 $\gcd(a_1,a_2)=1$，有
+              $$
+              n - j a_2, \quad j=0,1,\dots,a_1-1
+              $$
+              在模 $a_1$ 下两两不同。
+            </li>
+            <li>
+              存在 $\sigma \ge 0$ 和整数 $\rho$ 使得：
+              $$
+              \rho\cdot a_1 = n - \sigma a_2
+              $$
+            </li>
+        </section>
+
+        <section>
+          <p>这时候你可能在想，可没有可能 $\sigma$ 取得很大，会不会导致 $\rho$ 为负数呢？</p>
+          <p class="math">
+            $$
+            \rho a_1 = n - \sigma a_2 \ge -a_1 + 1 > -a_1
+            $$
+          </p>
+          <p>因此 $\rho \ge 0$。</p>
+        </section>
+
+      </section>
+
+      <section>
+        <section>
+          <h2>整数二元一次不定方程</h2>
+          <p>其实我们刚刚研究的东西反而更困难一点，因为硬币数量是非负的。</p>
+          <p>下面研究的这个方程，主要就是把之前的问题去掉非负的限制。</p>
+        </section>
+
+        <section>
+          <h3>问题描述</h3>
+          <p>
+            对于固定的 $(a,b,val)$，我希望研究满足
+            $$
+            a\cdot x + b\cdot y = val
+            $$
+            的解集 $\{(x,y): a\cdot x + b\cdot y = val\}$。这个集合实际上是由 $a,b,val$ 共同确定，所以这里记作
+            $$
+            S(a,b,val)
+            $$
+           </p>
+        </section>
+        <section>
+          <h3>平凡情况：$val$ 不是 $\gcd(a,b)$ 的倍数</h3>
+          这个时候 $S(a,b,val)$ 为空集。
+        </section>
+        <section>
+          <h3>简化问题</h3>
+          <p>
+            不妨只研究 $val = val'\cdot \gcd(a,b)$ 的情况。
+          </p>
+          <p>
+            并且，由 $\gcd$ 的定义可知，同样能把 $a,b$ 分别表示成
+            $$
+            a = a'\cdot \gcd(a,b), b = b'\cdot \gcd(a,b)
+            $$
+            于是可以想到约去这个公共的因子，得到
+            $$
+            S(a,b,val) = S(a',b',val')
+            $$
+          </p>
+        </section>
+        <section>
+          <h3>新问题</h3>
+          <p>
+            可以发现，这等价于说我只需要研究互质的 $a,b$ 的解集 $S(a,b,val)$。
+          </p>
+        </section>
+        <section>
+          <h3>同一解集中，元素之间的关系</h3>
+          <p>
+            条件 $(x_1,y_1),(x_2,y_2)\in S(a,b,val)$，可以等价成另外一个什么条件？
+          </p>
+        </section>
+        <section>
+          <h3>特解与通解</h3>
+          <p>
+            特解指的是，在 $S(a,b,val)$ 中找出其中一个元素。这个只需要构造性找到即可。
+          </p>
+          <p>
+            通解指的是，通过某个特解去刻画 $S(a,b,val)$ 中的所有元素。这个通过前面的分析，发现也并不困难。
+          </p>
+        </section>
+        <section>
+          <h3>寻找特解</h3>
+          <p>
+            如果能找到 $S(a,b,1)$ 的特解，则容易构造 $S(a,b,val)$ 的特解。
+          </p>
+        </section>
+        <section>
+          <h3>扩展欧几里得算法（ex-gcd）</h3>
+          <p>通过算法的过程，可以构造性地证明，对于 $a,b$，
+            存在 $(x_0,y_0)$ 使得
+            $$
+            ax_0 + by_0 = \gcd(a,b)
+            $$
+          </p>
+        </section>
+        <section>
+          <h3>扩展欧几里得算法运算的值域上界</h3>
+          <p>
+            只要在递归出口 
+            $$
+            (a,b) = (\gcd(a,b),0)
+            $$ 
+            设置 $(x,y) = (1,0)$，则通过数学归纳法可以证明运算过程中始终有
+            $$
+            |x|\le \max(\frac{b}{2\gcd(a,b)},1)
+            $$
+          </p>
+        </section>
+        <section>
+          <h3>多元情况？</h3>
+          <p>
+            这里只研究解的存在性。即满足
+            $$
+            a_1x_1 + a_2x_2 + a_3x_3 = \gcd(a_1,a_2,a_3)
+            $$
+            的 $(x_1,x_2,x_3)$ 是否存在。
+          </p>
+        </section>
+      </section>
+
+
+
+    </div>
+  </div>
+  <!-- 用户文件截止 -->
+
+
+
+
+
+
+
+
+
+  <!-- 主库 -->
+  <script src="dist/reveal.js"></script>
+
+  <!-- 插件 -->
+  <script src="plugin/markdown/markdown.js"></script>
+  <script src="plugin/highlight/highlight.js"></script>
+  <script src="plugin/notes/notes.js"></script>
+  <script src="plugin/zoom/zoom.js"></script>
+  <script src="plugin/search/search.js"></script>
+  <!-- <script src="plugin/fullscreen/fullscreen.js"></script> -->
+  <!-- <script src="plugin/menu/menu.js"></script> -->
+  <script src="plugin/math/math.js"></script>
+  <!-- <script src="plugin/autoanimate/autoanimate.js"></script> -->
+
+  <script src="plugin/reveald3.js"></script>
+
+  <!-- 初始化 -->
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      controls: true,
+      progress: true,
+      center: true,
+      plugins: [
+        RevealMarkdown,
+        RevealHighlight,
+        RevealNotes,
+        RevealZoom,
+        RevealSearch,
+        // RevealFullscreen,
+        // RevealMenu,
+        RevealMath,
+        // RevealAutoAnimate
+        Reveald3,
+      ]
+    });
+  </script>
+</body>
+
+</html>
