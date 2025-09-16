@@ -46,9 +46,51 @@ Otherwise, they are random bits with no meaning.
 
 NoSQL means schema-less, flexible... BUT it has no strict definition.
 
-### relational model
 
+## relational algebra
 
+省流：就是考虑一些元组构成的集合（有时是可重集），每个元组内部有对应的属性。从而可以想象成一个列代表某属性、行代表某个组，的一张二维表。
+
+Relational Algebra is a set of fundamental operations to retrieve and manipulate tuples in a relation. Each operator takes in one or more relations as inputs, and outputs a new relation. 
+
+In short, the symbolic operation on the 2d table (rows consist tuples, columns consist attributes)
+
+### Data Manipulation Languages (DMLs)
+
+DMLs refer to the API that a DBMS exposes to applications to store and retrieve information from a database. 
+There are two classes of languages for Manipulating a database: 
+- Procedural: The query specifies the (high-level) execution strategy the DBMS should use to find the desired result based on sets / bags. For example, use a for loop to scan all records and count how many records are there to retrieve the number of records in the table. 
+- Non-Procedural (Declarative): The query specifies only what data is wanted and not how to find it. For example, we can use SQL SELECT COUNT(\*) FROM artist to count how many records are there in the table.
+
+### select
+
+Select takes in a relation and outputs a subset of the tuples from that relation that satisfy a selection predicate. The predicate acts as a filter, and we can combine multiple predicates using conjunctions and disjunctions
+
+e.g.
+$$
+\sigma_{predicate}(R)
+$$
+
+### projection
+
+Projection takes in a relation and outputs a relation with tuples that contain only specified attributes.
+
+e.g.
+$$
+\pi_{A1,A2,A3}(R)
+$$
+
+### union, intersection, difference, product
+
+just like operation to set.
+
+### join
+
+Join takes in two relations and outputs a relation that contains all the tuples that are a combination of two tuples where for each attribute that the two relations share, the values for that attribute of both tuples is the same.
+
+$$
+R\Join S
+$$
 
 
 

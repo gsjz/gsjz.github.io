@@ -52,7 +52,7 @@ nav:
         - 本科学习/公开课程/CMU15-445/hw1.md
         - 补课:
           - 本科学习/公开课程/CMU15-445/补课/git 相关.md
-          - 本科学习/公开课程/CMU15-445/补课/cmake 简介.md
+          - 本科学习/公开课程/CMU15-445/补课/杂项.md
     - 考研内容:
       - 数学:
         - 本科学习/考研内容/数学/高数期末.md
@@ -74,6 +74,9 @@ theme:
   logo: images/GClef.svg
   favicon: images/GClef_black.svg
   
+  font:
+    code: Fira Code
+
   palette:
     # 日间模式
     - scheme: default
@@ -120,7 +123,9 @@ theme:
     # [点击按钮跳转至 GitHub 修改 Markdown 源文件]
     # https://squidfunk.github.io/mkdocs-material/setup/adding-a-git-repository/#code-actions
     # - content.action.edit
-    - navigation.tracking # 激活深度导航
+    
+    - navigation.tracking
+    
 
   language: zh # 一些提示性的文字会变成中文
   icon:
