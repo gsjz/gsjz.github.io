@@ -105,8 +105,99 @@ SELECT * FROM appearances LIMIT 5;
 
 abbr. ERD
 
+cmu 网站上那个图感觉有点不够高清。大概就是表示 schema 之间哪些是共用的，以及谁是 primary 谁是 foreign
+
+### sanity check
+
+这里指的是不严格地快速检查。
+
+## Q1
+
+一个 sample，List all active divisions ordered alphabetically。
+
+直接提供了 answer，
+
+```sql
+SELECT DISTINCT division FROM divisions WHERE active = 'Y' ORDER BY division;
+```
+告诉我们要把 SQL query 写到 `q1_sample.duckdb.sql` 文件里面。
+
+实际上，是可以把 `.sql` 当成纯文本文件，在里面写指令。对于 DuckDB，可以调用
+
+```Bash
+.read q1_sample.duckdb.sql
+```
+
+## Q2
+
+### Common Table Expression
+
+这里就是临时定义的一些表，用于后面使用.
+
+CTE 基本形式
+
+```sql
+WITH 名字 AS (
+  子查询
+)
+SELECT ...
+FROM 名字;
+```
+
+WITH ... AS (...) 定义了一个临时结果集（相当于一张虚拟表），在后续查询里可以直接当表使用。
+
+可以写多个，用逗号分隔。
+
+作用类似子查询，但可读性更高，也能被复用。
+
+`WITH ... AS` = 定义临时表（CTE），一个 WITH 可以定义不止一个临时结果集（CTE）。
+
+如果要写多个，就在前一个 `) AS (...)` 结束后，加个逗号，然后写下一个。最后一个 CTE 后面 不能有逗号，因为后面就要跟 `SELECT ...` 主查询了。
+
+### SQL 的解析顺序
+
+SQL 不是逐行从左到右，大致是
+
+1. FROM / JOIN
+    
+    先确定要用哪些表，怎么连接。
+
+1. WHERE
+
+    对上一步的结果集做过滤。
+
+1. GROUP BY
+
+    按照指定列把行分组。除了指定列是作为分组依据，其它每一列分组完的东西实际上是集合，没法直接输出，后续要对这些集合做聚合操作才能输出。
+
+1. 聚合函数（SUM, MAX, AVG, ...）
+
+    对每个组里的行做聚合运算。
+
+1. HAVING
+
+    可以再过滤整个分组
+
+1. SELECT
+
+    再从过滤后的结果里挑选需要的列。
+
+1. DISTINCT / ORDER BY / LIMIT
+
+    最后去重、排序、限制行数。
+
+### COALESCE
 
 
+```sql
+COALESCE(expr1, expr2, expr3, ...)
+```
+
+从左到右依次检查参数，返回 第一个非 NULL 的值。
+
+如果所有参数都是 NULL，则返回 NULL。
+
+当我们想要对聚合后的集合找最大值时，为了处理这个集合为空的情况，我们可能就需要用 `COALESCE` 来返回一个 0。
 
 ## language learning
 
@@ -114,3 +205,4 @@ abbr. ERD
 
 这里应该是老美钟爱的棒球语境。baseball bat。
 
+实际上这个 homework 用的 db 来自于一个棒球数据库。
