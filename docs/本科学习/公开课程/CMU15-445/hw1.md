@@ -199,7 +199,10 @@ COALESCE(expr1, expr2, expr3, ...)
 
 当我们想要对聚合后的集合找最大值时，为了处理这个集合为空的情况，我们可能就需要用 `COALESCE` 来返回一个 0。
 
-## language learning
+coalesce 字面上是合并的意思。
+
+
+## 英语学习
 
 ### number of games batted
 

@@ -1,6 +1,6 @@
 # lec1-notes
 
-## main
+## intro to database
 
 ### flat file strawman
 
@@ -49,7 +49,9 @@ NoSQL means schema-less, flexible... BUT it has no strict definition.
 
 ## relational algebra
 
-省流：就是考虑一些元组构成的集合（有时是可重集），每个元组内部有对应的属性。从而可以想象成一个列代表某属性、行代表某个组，的一张二维表。
+省流：relation 就是考虑一些元组构成的集合（有时是可重集），每个元组内部有对应的属性。从而可以想象成一个列代表某属性、行代表某个组，的一张二维表。
+
+这里介绍所谓的 algebra 更多的是从历史的角度考虑，当初设计 SQL 之前是先有人发了一个关于 relation 的文章，然后 SQL 是按照这个来设计的。更多的还是在后面的应用中了解。
 
 Relational Algebra is a set of fundamental operations to retrieve and manipulate tuples in a relation. Each operator takes in one or more relations as inputs, and outputs a new relation. 
 
@@ -94,7 +96,7 @@ $$
 
 
 
-## language learning
+## 英语学习
 
 ### internship
 
