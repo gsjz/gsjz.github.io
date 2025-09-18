@@ -16,6 +16,10 @@ The instructor gives a example that the possible value of Y is either 0 or 1. So
 
 和 regression problem 对比，就是相对来说这个 Y 的取值比较有限。
 
+## reinforcement learning
+
+中文叫强化学习。
+
 
 
 
@@ -49,3 +53,10 @@ forum 是论坛的意思
 
 指 最前沿的
 
+## do some maneuver you want
+
+a deliberate coordinated movement requiring dexterity and skill
+
+## make some remarkable stunts, a remarkable PR
+
+PR 应该是 public relation，所谓公关
