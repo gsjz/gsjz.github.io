@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>Dinic 最大流</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    :root{
+      --bg:#ffffff; --panel:#f6f7f9; --ink:#111827; --muted:#6b7280;
+      --edge:#1f2937; --edge-disabled:#e5e7eb; --bad:#dc2626;
+      /* 新增：区分颜色 */
+      --level:#10b981;    /* BFS 层次边：绿色 */
+      --preview:#f97316;  /* 预览/增广：橙色 */
+      --shadow:0 4px 18px rgba(0,0,0,.08);
+    }
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system, Segoe UI, Roboto, 'Noto Sans CJK SC', sans-serif}
+    #app{display:flex;height:100vh;overflow:hidden}
+
+    #sidebar{width:460px;min-width:340px;max-width:600px;background:var(--panel);border-right:1px solid #e5e7eb;display:flex;flex-direction:column;gap:12px;padding:14px;box-sizing:border-box}
+    #sidebar h1{font-size:16px;margin:0 0 8px}
+    .row{display:flex;gap:8px;align-items:center}
+    label{font-size:12px;color:var(--muted)}
+    .preset{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    select, textarea{width:100%;box-sizing:border-box;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+    select{height:36px;padding:0 10px}
+    textarea{height:170px;resize:vertical;padding:10px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace}
+
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .controls button{padding:8px 10px;border:1px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;box-shadow:var(--shadow)}
+    .controls button.primary{background:#2563eb;color:#fff;border-color:transparent}
+    .controls button:disabled{opacity:.6;cursor:not-allowed}
+
+    #legend{font-size:12px;color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}
+    #legend .swatch{width:22px;height:4px;border-radius:2px}
+
+    #lvlLegendWrap{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:8px}
+    #lvlLegendTitle{font-size:12px;color:var(--muted);margin-bottom:6px}
+    #lvlLegend{display:flex;flex-wrap:wrap;gap:6px}
+    .lvl-item{display:flex;align-items:center;gap:6px;padding:3px 6px;border:1px solid #e5e7eb;border-radius:999px}
+    .lvl-swatch{width:14px;height:10px;border-radius:3px;border:1px solid #e5e7eb;background:#fff}
+
+    #preview{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
+    #preview .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    #preview .path{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;white-space:pre-wrap}
+    #preview .stepper{display:flex;gap:8px;align-items:center;margin-top:8px}
+    #preview .stepper button{padding:4px 8px;border:1px solid #d1d5db;border-radius:8px;background:#fff;cursor:pointer}
+
+    #log{flex:1;overflow:auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;white-space:pre-wrap}
+
+    #stage{position:relative;flex:1}
+    svg{width:100%;height:100%;display:block;background:#fff}
+
+    .node{cursor:grab}
+    .node:active{cursor:grabbing}
+    .node circle{fill:#fff;stroke:#cbd5e1;stroke-width:2;transition:fill .15s} /* 用 JS .style('fill', …) 覆盖 */
+    .node text{pointer-events:none;font-weight:600;fill:var(--ink)}
+
+    .link-path{fill:none;stroke:var(--edge);stroke-width:1.8;marker-end:url(#arrowStrong)}
+    .link-muted{stroke:var(--edge-disabled)}
+    .link-level{stroke:var(--level);stroke-width:2.2} /* BFS 层次可行边：绿色 */
+
+    .overlay-path{fill:none;stroke:var(--preview);stroke-width:8;stroke-opacity:.12;marker-end:url(#arrowPreview)}
+    .overlay-path.seg{stroke-width:3;stroke-opacity:1}             /* 预览/增广：橙色 */
+    .overlay-path.back{stroke:var(--bad);stroke-dasharray:6 6;marker-end:url(#arrowBad)}
+
+    .edge-label{font:12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;fill:#111;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+
+    .toast{position:absolute;left:50%;top:18px;transform:translateX(-50%) translateY(-6px);background:#111827;color:#fff;padding:8px 12px;border-radius:999px;box-shadow:var(--shadow);opacity:0;transition:opacity .25s,transform .25s}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    #cheatsheet{position:absolute;right:16px;bottom:16px;background:#111827;color:#fff;border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);font-size:12px;line-height:1.5;opacity:.92}
+    #cheatsheet h3{margin:0 0 6px;font-size:12px;color:#93c5fd}
+    #cheatsheet kbd{background:#374151;border-radius:6px;padding:2px 6px;margin:0 3px}
+  </style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <h1>Dinic 最大流</h1>
+
+    <div class="preset">
+      <select id="preset">
+        <option value="p_simple">预设 A：两条并行支路</option>
+        <option value="p_chain">预设 B：链式多路</option>
+        <option value="p_cross">预设 C：交叉/回退</option>
+        <option value="p_dense">预设 D：较密图</option>
+      </select>
+      <button id="applyPreset">应用预设</button>
+    </div>
+
+    <div class="row"><label>输入格式（首行: n m s t；后续: u v cap，均为 1-based）：</label></div>
+    <textarea id="input"></textarea>
+
+    <div class="controls">
+      <button id="load" class="primary">加载图</button>
+      <button id="reset">重置流量</button>
+      <button id="run">跑到结束</button>
+      <button id="bfs">构建层次</button>
+      <button id="layoutLvl">按层排布</button>
+      <button id="find">找增广路</button>
+      <button id="confirm" disabled>执行增广</button>
+      <button id="cancel" disabled>取消预览</button>
+    </div>
+
+    <div id="legend">
+      <div class="swatch" style="background:var(--edge);"></div><div>原始方向边（有向箭头）</div>
+      <div class="swatch" style="background:var(--edge-disabled);"></div><div>cap=0 的原边（已满）</div>
+      <div class="swatch" style="background:var(--level);"></div><div>层次可行边（BFS 后）</div>
+      <div class="swatch" style="background:var(--preview);"></div><div>预览/增广路径（正向）</div>
+      <div class="swatch" style="background:var(--bad);"></div><div>预览中的反向残量（回退）</div>
+    </div>
+
+    <div id="lvlLegendWrap">
+      <div id="lvlLegendTitle">层颜色（BFS 后显示）：</div>
+      <div id="lvlLegend">（尚未构建）</div>
+    </div>
+
+    <div id="preview" aria-label="preview">
+      <div class="header"><b>预览增广路</b><span id="meta" style="color:var(--muted)">— 无</span></div>
+      <div id="pathText" class="path">（F 构建层次；G 找增广路；Enter 执行；Esc 取消）</div>
+      <div class="stepper">
+        <button id="stepPrev" disabled>◀ 边</button>
+        <span id="stepInfo" style="min-width:80px;text-align:center">0/0</span>
+        <button id="stepNext" disabled>边 ▶</button>
+      </div>
+    </div>
+
+    <div id="log" aria-label="log"></div>
+  </aside>
+
+  <main id="stage">
+    <svg id="svg"></svg>
+    <div id="toast" class="toast"></div>
+    <div id="cheatsheet" hidden>
+      <h3>快捷键</h3>
+      <div><kbd>F</kbd> 构建层次（BFS）</div>
+      <div><kbd>L</kbd> 按层排布</div>
+      <div><kbd>G</kbd> 找增广路（预览）</div>
+      <div><kbd>Enter</kbd> 执行增广　<kbd>Esc</kbd> 取消预览</div>
+      <div><kbd>Space</kbd>/<kbd>→</kbd>/<kbd>J</kbd> 下一段　<kbd>←</kbd>/<kbd>Backspace</kbd>/<kbd>K</kbd> 上一段</div>
+      <div><kbd>R</kbd> 跑到结束　<kbd>Z</kbd> 重置流量　<kbd>O</kbd> 加载图</div>
+      <div><kbd>P</kbd> 应用当前预设　<kbd>?</kbd>/<kbd>H</kbd> 显示/隐藏此速查</div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  // ===== 小工具 =====
+  function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
+  const logEl = document.getElementById('log');
+  function log(msg){ logEl.textContent += msg + "\n"; logEl.scrollTop = logEl.scrollHeight; }
+  function clearLog(){ logEl.textContent=''; }
+  function inEditable(e){ const t=e.target; const tag=t.tagName; return tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||t.isContentEditable; }
+  // 分层色带（不依赖额外包）
+  function rainbow(t){ const h=((t%1)+1)%1*360; return `hsl(${h},72%,62%)`; }
+
+  // ===== 预设 =====
+  const presets = {
+    p_simple: `6 8 1 6
+1 2 10
+1 3 8
+2 4 5
+2 3 3
+3 5 10
+4 5 7
+4 6 6
+5 6 10`,
+    p_chain: `8 10 1 8
+1 2 7
+1 3 6
+2 4 4
+2 5 3
+3 5 6
+3 6 4
+4 7 5
+5 7 5
+5 8 4
+6 8 6`,
+    p_cross: `6 9 1 6
+1 2 7
+1 3 6
+2 3 3
+2 4 6
+3 5 6
+4 5 3
+4 6 4
+5 6 8
+2 5 2`,
+    p_dense: `7 12 1 7
+1 2 6
+1 3 8
+1 4 5
+2 3 2
+2 5 6
+3 4 4
+3 5 5
+3 6 6
+4 6 7
+5 7 8
+6 7 6
+2 6 3`
+  };
+  const presetSel = document.getElementById('preset');
+  const inputEl = document.getElementById('input');
+  document.getElementById('applyPreset').addEventListener('click', ()=>{ inputEl.value = presets[presetSel.value] || presets.p_simple; });
+  inputEl.value = presets.p_simple;
+
+  // ===== 解析输入 =====
+  function parseInput(text){
+    const lines = text.split(/\n|\r/).map(s=>s.trim()).filter(s=>s && !/^#/.test(s));
+    if(lines.length===0) throw new Error('输入为空');
+    const [n,m,s,t] = lines[0].split(/\s+/).map(Number);
+    if(!Number.isInteger(n)||!Number.isInteger(m)||!Number.isInteger(s)||!Number.isInteger(t)) throw new Error('首行应为：n m s t（整数）');
+    const edges=[]; let id=0;
+    for(let i=1;i<lines.length;i++){
+      const a = lines[i].split(/\s+/).map(Number); if(a.length<3) continue;
+      const [u,v,cap] = a; edges.push({u:u-1, v:v-1, cap:+cap, id:id++});
+    }
+    return {n, m:edges.length, s:s-1, t:t-1, edges};
+  }
+
+  // ===== 残量网络（Dinic） =====
+  function buildResidual(n,s,t,edges){
+    const adj = Array.from({length:n}, ()=>[]);
+    const resEdges = []; const origMap = new Map();
+    function addEdge(u,v,cap,origId){
+      const idx = resEdges.length;
+      resEdges.push({u:u, v:v, cap:cap, rev:idx+1, origId:origId, forward:true});
+      resEdges.push({u:v, v:u, cap:0,   rev:idx,   origId:origId, forward:false});
+      adj[u].push(idx); adj[v].push(idx+1);
+      if(origId!=null) origMap.set(origId, idx);
+    }
+    for(const e of edges) addEdge(e.u,e.v,e.cap,e.id);
+    const orig = edges.map(e=>({u:e.u,v:e.v,cap0:e.cap,id:e.id}));
+    return {n,s,t,adj,resEdges,orig,origMap,maxf:0, level:null};
+  }
+
+  // ===== Dinic：BFS 分层 / DFS 找一条路径 =====
+  function bfsLevel(graph){
+    const {n,s,t,adj,resEdges} = graph;
+    const level = Array(n).fill(-1);
+    const q=[]; level[s]=0; q.push(s);
+    while(q.length){
+      const u=q.shift();
+      for(const ei of adj[u]){
+        const e=resEdges[ei];
+        if(e.cap>0 && level[e.v]===-1){
+          level[e.v]=level[u]+1;
+          q.push(e.v);
+        }
+      }
+    }
+    graph.level = level;
+    return level[t]!==-1;
+  }
+
+  function dfsFindPath(graph, u, t, f, path, usedIter){
+    if(u===t) return {flow:f, path: path.slice()};
+    const {adj,resEdges,level} = graph;
+    for(let i=usedIter[u]; i<adj[u].length; i++){
+      usedIter[u]=i;
+      const ei = adj[u][i], e = resEdges[ei];
+      if(e.cap<=0) continue;
+      if(level[e.v] !== level[u]+1) continue;
+      path.push({u:e.u, v:e.v, ei});
+      const ret = dfsFindPath(graph, e.v, t, Math.min(f, e.cap), path, usedIter);
+      if(ret.flow>0) return ret;
+      path.pop();
+    }
+    return {flow:0, path:[]};
+  }
+
+  function findAugmentPreview(graph){
+    if(!graph.level || graph.level[graph.t]===-1){
+      if(!bfsLevel(graph)) return null;
+    }
+    const usedIter = Array(graph.n).fill(0);
+    let res = dfsFindPath(graph, graph.s, graph.t, 1e18, [], usedIter);
+    if(res.flow===0){
+      if(!bfsLevel(graph)) return null;
+      usedIter.fill(0);
+      res = dfsFindPath(graph, graph.s, graph.t, 1e18, [], usedIter);
+      if(res.flow===0) return null;
+    }
+    return res; // {flow, path:[{u,v,ei}...]}
+  }
+
+  function applyAugment(graph, path, delta){
+    const {resEdges} = graph;
+    for(const step of path){
+      const e = resEdges[step.ei];
+      const r = resEdges[e.rev];
+      e.cap -= delta;
+      r.cap += delta;
+    }
+    graph.maxf += delta;
+  }
+
+  // ===== 可视化 =====
+  const svg = d3.select('#svg');
+  const defs = svg.append('defs');
+  // 箭头：原始、层次（绿）、预览（橙）、回退（红）
+  defs.append('marker').attr('id','arrowStrong').attr('viewBox','0 -5 10 10')
+    .attr('refX',18).attr('refY',0).attr('markerWidth',9).attr('markerHeight',9).attr('orient','auto')
+    .append('path').attr('d','M0,-5L10,0L0,5').attr('fill','var(--edge)');
+  defs.append('marker').attr('id','arrowLevel').attr('viewBox','0 -5 10 10')
+    .attr('refX',18).attr('refY',0).attr('markerWidth',9).attr('markerHeight',9).attr('orient','auto')
+    .append('path').attr('d','M0,-5L10,0L0,5').attr('fill','var(--level)');
+  defs.append('marker').attr('id','arrowPreview').attr('viewBox','0 -5 10 10')
+    .attr('refX',16).attr('refY',0).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto')
+    .append('path').attr('d','M0,-5L10,0L0,5').attr('fill','var(--preview)');
+  defs.append('marker').attr('id','arrowBad').attr('viewBox','0 -5 10 10')
+    .attr('refX',16).attr('refY',0).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto')
+    .append('path').attr('d','M0,-5L10,0L0,5').attr('fill','var(--bad)');
+
+  const gLinks = svg.append('g').attr('class','links');
+  const gOverlay = svg.append('g').attr('class','overlay');
+  const gNodes = svg.append('g').attr('class','nodes');
+
+  let current = null; // {graph, nodes, visEdges, preview, history}
+  let levelColorMap = null; // Array[L] = '#rrggbb'
+
+  function layoutCircle(n){
+    const {width,height} = svg.node().getBoundingClientRect();
+    const cx=width/2, cy=height/2, R=Math.max(120, Math.min(width,height)/2 - 80);
+    return Array.from({length:n},(_,i)=>{ const ang=(2*Math.PI*i)/n - Math.PI/2; return {id:i, x:cx+R*Math.cos(ang), y:cy+R*Math.sin(ang)}; });
+  }
+
+  function layoutByLevel(){
+    if(!current || !current.graph.level){ toast('请先 BFS 构建层次'); return; }
+    const lvl = current.graph.level;
+    const nodes = current.nodes;
+    const {width,height} = svg.node().getBoundingClientRect();
+    const padX=70, padY=60;
+    const valid = lvl.map((v,i)=>({v,i})).filter(x=>x.v>=0);
+    if(!valid.length) return;
+    const minL = d3.min(valid, d=>d.v), maxL = d3.max(valid, d=>d.v);
+    const cols = Math.max(1, maxL - minL + 1);
+    const xOf = L => padX + (width - 2*padX) * (L - minL) / (cols - 1 || 1);
+    const buckets = new Map();
+    valid.forEach(({v,i})=>{ if(!buckets.has(v)) buckets.set(v, []); buckets.get(v).push(i); });
+    for(const [L, arr] of buckets.entries()){
+      arr.sort((a,b)=>a-b);
+      const len = arr.length;
+      for(let k=0;k<len;k++){
+        const id = arr[k];
+        nodes[id].x = xOf(L);
+        nodes[id].y = padY + (height - 2*padY) * (k+1) / (len+1);
+      }
+    }
+    updateGeometry();
+  }
+
+  function buildVisEdges(graph){
+    const list = graph.orig.map(e=>({u:e.u,v:e.v,cap0:e.cap0,id:e.id}));
+    const byPair = new Map();
+    for(const e of list){
+      const a=Math.min(e.u,e.v), b=Math.max(e.u,e.v);
+      const k=`${a}-${b}`;
+      if(!byPair.has(k)) byPair.set(k,{a,b,fwd:[],rev:[]});
+      const bucket=byPair.get(k);
+      if(e.u===a && e.v===b) bucket.fwd.push(e); else bucket.rev.push(e);
+    }
+    const vis=[];
+    for(const {a,b,fwd,rev} of byPair.values()){
+      const signBase=(a<b)?+1:-1;
+      const cntF=fwd.length;
+      for(let i=0;i<cntF;i++){
+        const e=fwd[i];
+        const offset=(i-(cntF-1)/2)*0.14;
+        const curved=signBase*(0.26+offset);
+        const tpos=cntF===1?0.42:0.32+i/(cntF-1)*0.2;
+        const labelDy=signBase*(i-(cntF-1)/2)*10;
+        vis.push({...e, curved, tpos, labelDy});
+      }
+      const cntR=rev.length;
+      for(let i=0;i<cntR;i++){
+        const e=rev[i];
+        const offset=(i-(cntR-1)/2)*0.14;
+        const curved=-signBase*(0.26+offset);
+        const tpos=cntR===1?0.58:0.68 - i/(cntR-1)*0.2;
+        const labelDy=-signBase*(i-(cntR-1)/2)*10;
+        vis.push({...e, curved, tpos, labelDy});
+      }
+    }
+    return vis;
+  }
+
+  function controlPoint(x1,y1,x2,y2,curved){ const mx=(x1+x2)/2, my=(y1+y2)/2; if(Math.abs(curved)<1e-6) return {x:mx,y:my}; const dx=x2-x1, dy=y2-y1; const len=Math.hypot(dx,dy)||1; const nx=-dy/len, ny=dx/len; const k=curved*64; return {x:mx+nx*k, y:my+ny*k}; }
+  function pathD(x1,y1,x2,y2,curved){ if(Math.abs(curved)<1e-6) return `M${x1},${y1} L${x2},${y2}`; const c=controlPoint(x1,y1,x2,y2,curved); return `M${x1},${y1} Q${c.x},${c.y} ${x2},${y2}`; }
+  function quadPoint(p0,p1,pc,t){ const x=(1-t)*(1-t)*p0.x + 2*(1-t)*t*pc.x + t*t*p1.x; const y=(1-t)*(1-t)*p0.y + 2*(1-t)*t*pc.y + t*t*p1.y; return {x,y}; }
+  function quadTangent(p0,p1,pc,t){ const dx=2*(1-t)*(pc.x-p0.x) + 2*t*(p1.x-pc.x); const dy=2*(1-t)*(pc.y-p0.y) + 2*t*(p1.y-pc.y); return {dx,dy}; }
+
+  function currentFlowOnOrigEdge(graph, orig){ const fi=graph.origMap.get(orig.id); const fwd=graph.resEdges[fi]; return orig.cap0 - fwd.cap; }
+
+  function drawAll(){
+    const {nodes, visEdges, graph} = current;
+    const linkSel = gLinks.selectAll('g.link').data(visEdges, d=>d.id);
+    const linkEnter = linkSel.enter().append('g').attr('class','link');
+    linkEnter.append('path').attr('class','link-path');
+    linkEnter.append('text').attr('class','edge-label');
+
+    const all = linkEnter.merge(linkSel);
+    all.select('path.link-path')
+      .attr('d', d=> pathD(nodes[d.u].x,nodes[d.u].y,nodes[d.v].x,nodes[d.v].y,d.curved))
+      .classed('link-muted', d=>{ const fi=current.graph.origMap.get(d.id); return current.graph.resEdges[fi].cap===0; })
+      .classed('link-level', false)
+      .style('marker-end','url(#arrowStrong)'); // 先统一回默认箭头
+
+    all.select('text.edge-label')
+      .each(function(d){
+        const p0={x:nodes[d.u].x,y:nodes[d.u].y}; const p1={x:nodes[d.v].x,y:nodes[d.v].y};
+        const pc=controlPoint(p0.x,p0.y,p1.x,p1.y,d.curved); const t=d.tpos || .5;
+        const pt=quadPoint(p0,p1,pc,t); const tg=quadTangent(p0,p1,pc,t); const L=Math.hypot(tg.dx,tg.dy)||1; const nx=-tg.dy/L, ny=tg.dx/L;
+        const x=pt.x + nx*(d.labelDy||0); const y=pt.y + ny*(d.labelDy||0);
+        d3.select(this).attr('x',x).attr('y',y);
+      })
+      .attr('text-anchor','middle')
+      .text(d=>`${currentFlowOnOrigEdge(graph,d)}/${d.cap0}`);
+
+    linkSel.exit().remove();
+
+    const nodeSel = gNodes.selectAll('g.node').data(nodes, d=>d.id);
+    const nodeEnter = nodeSel.enter().append('g').attr('class','node')
+      .call(d3.drag().on('start',dragStart).on('drag',dragged).on('end',dragEnd));
+    nodeEnter.append('circle').attr('r',18);
+    nodeEnter.append('text').attr('dy','0.35em').attr('font-size',13).text(d=>d.id+1);
+    nodeEnter.append('title').text(d=>`节点 ${d.id+1}`);
+    nodeEnter.merge(nodeSel).attr('transform', d=>`translate(${d.x},${d.y})`);
+    nodeSel.exit().remove();
+
+    // 起始涂白（行内样式覆盖 CSS）
+    gNodes.selectAll('g.node').select('circle').style('fill','#ffffff');
+
+    refreshLevelStyles();
+  }
+
+  function updateGeometry(){
+    if(!current) return;
+    const {nodes} = current;
+    gLinks.selectAll('g.link').select('path.link-path')
+      .attr('d', d=> pathD(nodes[d.u].x,nodes[d.u].y,nodes[d.v].x,nodes[d.v].y,d.curved));
+    gLinks.selectAll('g.link').select('text.edge-label').each(function(d){
+      const p0={x:nodes[d.u].x,y:nodes[d.u].y}; const p1={x:nodes[d.v].x,y:nodes[d.v].y};
+      const pc=controlPoint(p0.x,p0.y,p1.x,p1.y,d.curved); const t=d.tpos || .5;
+      const pt=quadPoint(p0,p1,pc,t); const tg=quadTangent(p0,p1,pc,t); const L=Math.hypot(tg.dx,tg.dy)||1; const nx=-tg.dy/L, ny=tg.dx/L;
+      const x=pt.x + nx*(d.labelDy||0); const y=pt.y + ny*(d.labelDy||0);
+      d3.select(this).attr('x',x).attr('y',y);
+    });
+    gNodes.selectAll('g.node').attr('transform', d=>`translate(${d.x},${d.y})`);
+  }
+
+  function refreshLabels(){
+    const {graph}=current;
+    gLinks.selectAll('g.link').select('text.edge-label')
+      .text(d=>`${currentFlowOnOrigEdge(graph,d)}/${d.cap0}`);
+    gLinks.selectAll('g.link').select('path.link-path')
+      .classed('link-muted', d=>{ const fi=graph.origMap.get(d.id); return graph.resEdges[fi].cap===0; });
+  }
+
+  function updateLevelLegend(){
+    const box = document.getElementById('lvlLegend');
+    box.innerHTML = '';
+    if(!current || !current.graph.level){ box.textContent='（尚未构建）'; return; }
+    const lvl = current.graph.level;
+    const vals = Array.from(new Set(lvl.filter(x=>x>=0))).sort((a,b)=>a-b);
+    if(!vals.length){ box.textContent='（尚未构建）'; return; }
+    for(const L of vals){
+      const item = document.createElement('span');
+      item.className = 'lvl-item';
+      const sw = document.createElement('span');
+      sw.className = 'lvl-swatch';
+      sw.style.background = (levelColorMap && levelColorMap[L]) ? levelColorMap[L] : '#fff';
+      const txt = document.createElement('span');
+      txt.textContent = `L=${L}`;
+      item.appendChild(sw); item.appendChild(txt);
+      box.appendChild(item);
+    }
+  }
+
+  function refreshLevelStyles(){
+    // 1) 节点层色映射
+    levelColorMap = null;
+    if(current && current.graph.level){
+      const lvl = current.graph.level;
+      const valid = lvl.filter(x=>x>=0);
+      if(valid.length){
+        const minL = d3.min(valid), maxL = d3.max(valid);
+        levelColorMap = [];
+        const span = Math.max(1, maxL - minL + 1);
+        for(let L=minL; L<=maxL; L++){
+          const t = (L - minL + 0.5) / span;
+          levelColorMap[L] = rainbow(t);
+        }
+      }
+    }
+
+    // 2) 边：BFS 层次可行边 高亮 + 替换箭头为绿色
+    if(!current || !current.graph.level) {
+      gLinks.selectAll('path.link-path')
+        .classed('link-level', false)
+        .style('marker-end','url(#arrowStrong)');
+      // 3) 节点：恢复白色
+      gNodes.selectAll('g.node').select('circle').style('fill', '#ffffff');
+      updateLevelLegend();
+      return;
+    }
+    const lvl = current.graph.level;
+    gLinks.selectAll('g.link').select('path.link-path')
+      .classed('link-level', d=>{
+        const fi=current.graph.origMap.get(d.id);
+        const e=current.graph.resEdges[fi];
+        return (e.cap>0) && (lvl[e.u]>=0) && (lvl[e.v]===lvl[e.u]+1);
+      })
+      .style('marker-end', d=>{
+        const fi=current.graph.origMap.get(d.id);
+        const e=current.graph.resEdges[fi];
+        const ok = (e.cap>0) && (lvl[e.u]>=0) && (lvl[e.v]===lvl[e.u]+1);
+        return ok ? 'url(#arrowLevel)' : 'url(#arrowStrong)';
+      });
+
+    // 3) 节点：按层着色（行内样式覆盖 CSS）
+    gNodes.selectAll('g.node').select('circle')
+      .style('fill', d=>{
+        const L = lvl[d.id];
+        return (levelColorMap && levelColorMap[L]) ? levelColorMap[L] : '#ffffff';
+      });
+
+    updateLevelLegend();
+  }
+
+  function getCurvedFor(u,v){
+    const ve=current.visEdges.find(x=>x.u===u && x.v===v);
+    if(ve) return ve.curved;
+    const opp=current.visEdges.find(x=>x.u===v && x.v===u);
+    return opp? -opp.curved : 0;
+  }
+
+  function highlightPath(steps,k){
+    gOverlay.selectAll('*').remove();
+    if(!steps||steps.length===0) return;
+    const {nodes}=current;
+    const upto=Math.min(k==null?steps.length:k, steps.length);
+    for(let i=0;i<upto;i++){
+      const st=steps[i];
+      const curved=getCurvedFor(st.u,st.v);
+      const d = pathD(nodes[st.u].x,nodes[st.u].y,nodes[st.v].x,nodes[st.v].y, curved);
+      const cls='overlay-path seg'+(st.backward?' back':'');
+      gOverlay.append('path').attr('class',cls).attr('d',d);
+    }
+  }
+
+  // ===== 交互：拖拽、预览、快捷键 =====
+  function dragStart(){ d3.select(this).raise(); }
+  function dragged(event,d){ d.x=event.x; d.y=event.y; updateGeometry(); if(current && current.preview) highlightPath(current.preview.steps, current.preview.k); }
+  function dragEnd(){}
+
+  const metaEl=document.getElementById('meta');
+  const pathTextEl=document.getElementById('pathText');
+  const stepPrevBtn=document.getElementById('stepPrev');
+  const stepNextBtn=document.getElementById('stepNext');
+  const stepInfoEl=document.getElementById('stepInfo');
+
+  function setPreview(pre){
+    current.preview=pre;
+    document.getElementById('confirm').disabled=!pre;
+    document.getElementById('cancel').disabled=!pre;
+    stepPrevBtn.disabled=!pre; stepNextBtn.disabled=!pre;
+    if(!pre){
+      metaEl.textContent='— 无';
+      pathTextEl.textContent='（F 构建层次；G 找增广路；Enter 执行；Esc 取消）';
+      stepInfoEl.textContent='0/0';
+      gOverlay.selectAll('*').remove();
+      return;
+    }
+    const seq=pre.steps.map(s=>`${s.u+1}→${s.v+1}`).join(' , ');
+    metaEl.textContent=`Δ=${pre.delta}`;
+    pathTextEl.textContent=`路径：${seq}`;
+    stepInfoEl.textContent=`${pre.k}/${pre.steps.length}`;
+    highlightPath(pre.steps, pre.k);
+  }
+
+  function buildStepsFromPath(path){
+    const steps=path.map(({ei})=>{
+      const e=current.graph.resEdges[ei];
+      return {u:e.u,v:e.v,backward:!e.forward};
+    });
+    return steps;
+  }
+
+  // ===== 顶部按钮 =====
+  document.getElementById('bfs').addEventListener('click', ()=>{
+    if(!current){ toast('先加载图'); return; }
+    const ok = bfsLevel(current.graph);
+    if(ok){ refreshLevelStyles(); layoutByLevel(); toast('BFS 层次构建完成'); log('BFS：层次图已构建并按层排布'); }
+    else{ refreshLevelStyles(); toast('汇点不可达'); log('BFS：汇点不可达'); }
+    setPreview(null);
+  });
+
+  function doFind(){
+    if(!current){ toast('先加载图'); return; }
+    const ret=findAugmentPreview(current.graph);
+    if(!ret){ toast('无可增广路径'); setPreview(null); log('无可增广路径：可能已达最大流'); return; }
+    const steps=buildStepsFromPath(ret.path);
+    setPreview({steps, delta:ret.flow, k:1});
+  }
+  document.getElementById('find').addEventListener('click', doFind);
+
+  function stepNext(){
+    if(!current||!current.preview){ toast('先按 G 找增广路'); return; }
+    current.preview.k=Math.min(current.preview.steps.length, (current.preview.k||1)+1);
+    stepInfoEl.textContent=`${current.preview.k}/${current.preview.steps.length}`;
+    highlightPath(current.preview.steps, current.preview.k);
+  }
+  function stepPrev(){
+    if(!current||!current.preview){ toast('先按 G 找增广路'); return; }
+    current.preview.k=Math.max(1, (current.preview.k||1)-1);
+    stepInfoEl.textContent=`${current.preview.k}/${current.preview.steps.length}`;
+    highlightPath(current.preview.steps, current.preview.k);
+  }
+  document.getElementById('stepNext')?.addEventListener('click', stepNext);
+  document.getElementById('stepPrev')?.addEventListener('click', stepPrev);
+
+  document.getElementById('layoutLvl').addEventListener('click', ()=>{ layoutByLevel(); toast('已按层排布'); });
+
+  document.getElementById('confirm').addEventListener('click', ()=>{
+    if(!current||!current.preview){ toast('先按 G 找增广路'); return; }
+    const ret=findAugmentPreview(current.graph);
+    if(!ret){ toast('路径失效或不可达'); setPreview(null); return; }
+    const path=ret.path;
+    applyAugment(current.graph, path, ret.flow);
+    setPreview(null);
+    refreshLabels();
+    const steps = buildStepsFromPath(path);
+    log(`确认增广：路径 ${steps.map(s=>`${s.u+1}→${s.v+1}`).join(' , ')} ，Δ=${ret.flow} ；累计 flow=${current.graph.maxf}`);
+    highlightPath(steps, steps.length);
+    setTimeout(()=>gOverlay.selectAll('*').remove(), 700);
+  });
+
+  document.getElementById('cancel').addEventListener('click', ()=>{ setPreview(null); });
+
+  document.getElementById('run').addEventListener('click', async ()=>{
+    if(!current){ toast('请先加载图'); return; }
+    setPreview(null);
+    let guard=0;
+    while(true){
+      if(!bfsLevel(current.graph)){ log('不可达：算法结束'); toast('完成'); break; }
+      refreshLevelStyles();
+      layoutByLevel();
+      const iter = Array(current.graph.n).fill(0);
+      function dfsApply(u, t, f, path){
+        if(u===t) return {flow:f, path:path.slice()};
+        const {adj,resEdges,level} = current.graph;
+        for(let i=iter[u]; i<adj[u].length; i++){
+          iter[u]=i;
+          const ei = adj[u][i], e = resEdges[ei];
+          if(e.cap<=0) continue;
+          if(level[e.v] !== level[u]+1) continue;
+          path.push({ei});
+          const ret = dfsApply(e.v, t, Math.min(f, e.cap), path);
+          if(ret.flow>0){
+            resEdges[ei].cap -= ret.flow;
+            resEdges[e.rev].cap += ret.flow;
+            return ret;
+          }
+          path.pop();
+        }
+        return {flow:0, path:[]};
+      }
+      while(true){
+        const r = dfsApply(current.graph.s, current.graph.t, 1e18, []);
+        if(r.flow===0) break;
+        current.graph.maxf += r.flow;
+        const steps = buildStepsFromPath(r.path);
+        highlightPath(steps, steps.length);
+        refreshLabels();
+        log(`增广：路径 ${steps.map(s=>`${s.u+1}→${s.v+1}`).join(' , ')} ，Δ=${r.flow} ；累计 flow=${current.graph.maxf}`);
+        await new Promise(rz=>setTimeout(rz, 320));
+        if(++guard>5000){ log('保护性中断（轮次过多）'); break; }
+      }
+      if(guard>5000) break;
+    }
+  });
+
+  // 右键/中键步进（预览区 & 舞台）
+  function bindMouseShortcuts(el){
+    el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); stepNext(); });
+    el.addEventListener('pointerdown', (e)=>{
+      if(e.button===2){ e.preventDefault(); stepNext(); }
+      if(e.button===1){ e.preventDefault(); stepPrev(); }
+    });
+  }
+  bindMouseShortcuts(document.getElementById('preview'));
+  bindMouseShortcuts(document.getElementById('stage'));
+
+  // 键盘
+  const cheatsheet = document.getElementById('cheatsheet');
+  function toggleSheet(){ cheatsheet.hidden = !cheatsheet.hidden; }
+  window.addEventListener('keydown', (e)=>{
+    if(inEditable(e)) return;
+    if(e.key==='?' || e.key==='h' || e.key==='H'){ e.preventDefault(); toggleSheet(); return; }
+    if(e.key==='f' || e.key==='F'){ e.preventDefault(); document.getElementById('bfs').click(); return; }
+    if(e.key==='g' || e.key==='G'){ e.preventDefault(); doFind(); return; }
+    if(e.key==='l' || e.key==='L'){ e.preventDefault(); layoutByLevel(); return; }
+    if(e.code==='ArrowRight' || e.code==='Space' || e.key==='j' || e.key==='J'){ e.preventDefault(); stepNext(); return; }
+    if(e.code==='ArrowLeft' || e.key==='Backspace' || e.key==='k' || e.key==='K'){ e.preventDefault(); stepPrev(); return; }
+    if(e.key==='Enter' && !e.ctrlKey){ e.preventDefault(); document.getElementById('confirm').click(); return; }
+    if(e.key==='Escape'){ e.preventDefault(); document.getElementById('cancel').click(); return; }
+    if(e.key==='r' || e.key==='R'){ e.preventDefault(); document.getElementById('run').click(); return; }
+    if(e.key==='z' || e.key==='Z'){ e.preventDefault(); document.getElementById('reset').click(); return; }
+    if(e.key==='o' || e.key==='O'){ e.preventDefault(); document.getElementById('load').click(); return; }
+    if(e.key==='p' || e.key==='P'){ e.preventDefault(); document.getElementById('applyPreset').click(); return; }
+  }, {capture:true});
+
+  // 加载/重置
+  document.getElementById('load').addEventListener('click', ()=>{
+    let data;
+    try{ data=parseInput(inputEl.value); } catch(e){ toast(e.message); return; }
+    const graph=buildResidual(data.n, data.s, data.t, data.edges);
+    const nodes=layoutCircle(data.n);
+    const visEdges=buildVisEdges(graph);
+    current={graph, nodes, visEdges, preview:null, history:[]};
+    clearLog(); drawAll(); toast('图已加载');
+    log(`n=${data.n}, m=${data.m}, s=${data.s+1}, t=${data.t+1}`);
+    setPreview(null);
+    refreshLevelStyles(); // 清空层着色 + 图例
+  });
+
+  document.getElementById('reset').addEventListener('click', ()=>{
+    if(!current){ toast('请先加载图'); return; }
+    const base=current.graph.orig.map(e=>({u:e.u,v:e.v,cap:e.cap0,id:e.id}));
+    current.graph = buildResidual(current.graph.n, current.graph.s, current.graph.t, base);
+    current.history=[]; setPreview(null); refreshLabels(); refreshLevelStyles(); clearLog(); toast('已重置');
+  });
+
+  // 初始自动加载一次
+  document.getElementById('load').click();
+  // 初次显示快捷键速查
+  document.getElementById('cheatsheet').hidden = false;
+})();
+</script>
+</body>
+</html>
