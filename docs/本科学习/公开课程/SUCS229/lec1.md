@@ -21,8 +21,6 @@ The instructor gives a example that the possible value of Y is either 0 or 1. So
 中文叫强化学习。
 
 
-
-
 ## 英语学习
 
 ### using this as a forum to run surveys
@@ -53,10 +51,19 @@ forum 是论坛的意思
 
 指 最前沿的
 
-## do some maneuver you want
+### do some maneuver you want
 
 a deliberate coordinated movement requiring dexterity and skill
 
-## make some remarkable stunts, a remarkable PR
+### make some remarkable stunts, a remarkable PR
 
 PR 应该是 public relation，所谓公关
+
+### render the code
+
+渲染
+
+### do not require long answers ... be as concise as possible
+
+简明
+
