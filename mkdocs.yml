@@ -69,10 +69,13 @@ nav:
         - 本科学习/考研内容/408/杂记/251002.md
         - 本科学习/考研内容/408/杂记/251011.md
         - 本科学习/考研内容/408/杂记/251013.md
+        - 本科学习/考研内容/408/杂记/251016.md
         - 本科学习/考研内容/408/CN/局域网.md
         - 本科学习/考研内容/408/DS/堆排序.md
         - 本科学习/考研内容/408/DS/线索二叉树.md
         - 本科学习/考研内容/408/OS/进程与线程.md
+        - 本科学习/考研内容/408/CO/计算集系统层次结构.md
+        
         
       - 数学:
         - 本科学习/考研内容/数学/高数期末.md
@@ -220,7 +223,6 @@ markdown_extensions:
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
-  - pymdownx.superfences
   # [Markdown 提示]
   # https://squidfunk.github.io/mkdocs-material/reference/admonitions/
   - admonition
@@ -230,6 +232,11 @@ markdown_extensions:
   - footnotes
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
 extra_javascript:
   # [数学公式支持]
@@ -237,6 +244,8 @@ extra_javascript:
   - mkdocs/javascripts/katex.js
   - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/katex.min.js
   - https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.7/contrib/auto-render.min.js
+
+  - mkdocs/javascripts/mermaid-init.js
 extra_css:
   # [数学公式支持]
   # https://squidfunk.github.io/mkdocs-material/reference/math/#katex
@@ -246,3 +255,4 @@ extra_css:
   - mkdocs/css/no-footer.css
   # 无序列表符号自定义
   - mkdocs/css/unordered-list-symbols.css
+  - mkdocs/css/extra.css
