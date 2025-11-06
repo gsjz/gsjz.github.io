@@ -1,0 +1,14 @@
+/* ===== Mermaid 居中 ===== */
+.mermaid {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  max-width: 100%;
+}
+
+/* ===== 可选：让 Mermaid 图在深色/浅色主题下更协调 ===== */
+/* Material 会自动切换 body[data-md-color-scheme="slate"] (深色) 和 default (浅色) */
+[data-md-color-scheme="slate"] .mermaid {
+  filter: brightness(0.9);
+}
