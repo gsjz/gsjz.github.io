@@ -1,1 +1,14 @@
 .vscode
+
+# tex 临时文件
+*.aux
+*.fdb_latexmk
+*.fls
+*.lof
+*.log
+*.synctex.gz
+*.toc
+*.out
+*.nav
+*.snm
+*.thm
