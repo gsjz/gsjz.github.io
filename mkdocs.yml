@@ -5,41 +5,6 @@ site_author: SergioGao
 site_description: 高书捷的主页
 
 nav:
-  - XCPC:
-    - XCPC/index.md
-    - 分类题解:
-      - XCPC/分类题解/笛卡尔树.md
-      - XCPC/分类题解/凸优化相关.md
-      - XCPC/分类题解/网络流.md
-      - XCPC/分类题解/特殊 MST.md
-      - XCPC/分类题解/树上计数.md
-      - XCPC/分类题解/Tarjan 相关.md
-      - XCPC/分类题解/多项式相关.md
-      - XCPC/分类题解/Min-max 容斥.md
-      - XCPC/分类题解/中国剩余定理.md
-      - XCPC/分类题解/异或线性基.md
-      - XCPC/分类题解/杜教筛.md
-      - XCPC/分类题解/Fibonacci 数.md
-    - 普通题解:
-      - XCPC/普通题解/杂题集一.md
-      - XCPC/普通题解/杂题集二.md
-      - XCPC/普通题解/杂题集三.md
-    - 模板与课件:
-      - XCPC/模板与课件/参赛模板.md
-      - XCPC/模板与课件/Min-Max 容斥课件.md
-      - 算法可视化:
-        - AC 自动机: XCPC/模板与课件/算法可视化/AC-automaton.html
-        - 后缀自动机: XCPC/模板与课件/算法可视化/suffix-automaton.html
-        - Dinic 最大流: XCPC/模板与课件/算法可视化/Dinic-flow.html
-        - Dijkstra 费用流: XCPC/模板与课件/算法可视化/Dijkstra-cost-flow.html
-        - 草稿: XCPC/模板与课件/算法可视化/draft.html
-      - 家教记录: 
-        - yzl_lec1: XCPC/模板与课件/reveal.js/yzl_lec1.html
-        - yzl_lec2: XCPC/模板与课件/reveal.js/yzl_lec2.html
-        - yzl_lec3: XCPC/模板与课件/reveal.js/yzl_lec3.html
-        - yzl_lec4: XCPC/模板与课件/reveal.js/yzl_lec4.html
-        - yzl_lec5: XCPC/模板与课件/reveal.js/yzl_lec5.html
-        - yzl_lec6: XCPC/模板与课件/reveal.js/yzl_lec6.html
   - 本科学习:
     - 本科学习/index.md
     - 公开课程:
@@ -91,6 +56,41 @@ nav:
         - 本科学习/本科通识/大学物理/相对论.md
       - 雅思英语:
         - 本科学习/本科通识/雅思英语/5-1.md
+  - XCPC:
+    - XCPC/index.md
+    - 分类题解:
+      - XCPC/分类题解/笛卡尔树.md
+      - XCPC/分类题解/凸优化相关.md
+      - XCPC/分类题解/网络流.md
+      - XCPC/分类题解/特殊 MST.md
+      - XCPC/分类题解/树上计数.md
+      - XCPC/分类题解/Tarjan 相关.md
+      - XCPC/分类题解/多项式相关.md
+      - XCPC/分类题解/Min-max 容斥.md
+      - XCPC/分类题解/中国剩余定理.md
+      - XCPC/分类题解/异或线性基.md
+      - XCPC/分类题解/杜教筛.md
+      - XCPC/分类题解/Fibonacci 数.md
+    - 普通题解:
+      - XCPC/普通题解/杂题集一.md
+      - XCPC/普通题解/杂题集二.md
+      - XCPC/普通题解/杂题集三.md
+    - 模板与课件:
+      - XCPC/模板与课件/参赛模板.md
+      - XCPC/模板与课件/Min-Max 容斥课件.md
+      - 算法可视化:
+        - AC 自动机: XCPC/模板与课件/算法可视化/AC-automaton.html
+        - 后缀自动机: XCPC/模板与课件/算法可视化/suffix-automaton.html
+        - Dinic 最大流: XCPC/模板与课件/算法可视化/Dinic-flow.html
+        - Dijkstra 费用流: XCPC/模板与课件/算法可视化/Dijkstra-cost-flow.html
+        - 草稿: XCPC/模板与课件/算法可视化/draft.html
+      - 家教记录: 
+        - yzl_lec1: XCPC/模板与课件/reveal.js/yzl_lec1.html
+        - yzl_lec2: XCPC/模板与课件/reveal.js/yzl_lec2.html
+        - yzl_lec3: XCPC/模板与课件/reveal.js/yzl_lec3.html
+        - yzl_lec4: XCPC/模板与课件/reveal.js/yzl_lec4.html
+        - yzl_lec5: XCPC/模板与课件/reveal.js/yzl_lec5.html
+        - yzl_lec6: XCPC/模板与课件/reveal.js/yzl_lec6.html  
 
 
 theme:
