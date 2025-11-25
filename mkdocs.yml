@@ -7,6 +7,17 @@ site_description: 高书捷的主页
 nav:
   - 应用与计算数学:
     - 应用与计算数学/index.md
+    - 历年真题:
+      - 应用与计算数学/历年真题/2024.md
+    - 线性和非线性规划:
+      - 应用与计算数学/线性和非线性规划/单纯形法.md
+      - 应用与计算数学/线性和非线性规划/内点法.md
+      - 应用与计算数学/线性和非线性规划/罚函数法.md
+      - 应用与计算数学/线性和非线性规划/牛顿法.md
+      - 应用与计算数学/线性和非线性规划/同伦法.md
+      - 应用与计算数学/线性和非线性规划/不动点法.md
+      - 应用与计算数学/线性和非线性规划/动态规划.md
+      
   - 本科学习:
     - 本科学习/index.md
     - 公开课程:
@@ -129,7 +140,7 @@ theme:
 copyright: SergioGao CC-BY-4.0
 extra:
     
-  social: # icons
+  social:
     - name: GitHub
       icon: fontawesome/brands/github
       link: https://github.com/gsjz
