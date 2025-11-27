@@ -165,7 +165,8 @@ markdown_extensions:
       line_spans: __span
       pygments_lang_class: true
   - pymdownx.inlinehilite
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      base_path: !relative
   - admonition
   - pymdownx.details
   - footnotes
@@ -188,3 +189,4 @@ extra_css:
   - mkdocs/css/no-footer.css
   - mkdocs/css/unordered-list-symbols.css
   - mkdocs/css/extra.css
+  - mkdocs/css/chip-color.css

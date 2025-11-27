@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>高书捷 · 通用简历</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <style>
+        html {
+            font-size: 10px;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+                "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .cv-page {
+            max-width: 210mm;
+            height: 297mm;
+            margin: 0px auto;
+            padding: 16mm;
+            background: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.12);
+            box-sizing: border-box;
+        }
+
+        h1,
+        h2,
+        h3 {
+            margin: 0 0 0.6em;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.4em;
+            margin-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 1.4rem;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+
+        p {
+            margin: 0.2em 0 0.6em;
+            line-height: 1.6;
+        }
+
+        ul {
+            margin: 0.4em 0 0.8em 1.2em;
+            padding: 0;
+        }
+
+        li {
+            margin: 0.2em 0;
+            line-height: 1.6;
+        }
+
+        a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* 左右一行：标签 + 时间 */
+        .row {
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
+            margin-bottom: 0.4em;
+        }
+
+        .row .right {
+            margin-left: auto;
+            white-space: nowrap;
+            font-size: 0.85em;
+            color: #6b7280;
+        }
+
+        .row3 {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .row3 .middle {
+            margin: 0 auto;
+            /* 自动吃掉左右空白，把自己顶到正中间 */
+        }
+
+        .row3 .right {
+            white-space: nowrap;
+            /* 可选：防止时间被换行 */
+            color: #6b7280;
+        }
+
+        /* 标签 chip 基础样式 */
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 0.6em;
+            margin: 0 0.4em 0.25em 0;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            line-height: 1.8;
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        /* 颜色变体 */
+        .chip-purple {
+            background: #f3e8ff;
+            color: #7e22ce;
+        }
+
+        .chip-indigo {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        /* 小分组标题与内容的间距 */
+        .section {
+            margin-bottom: 1.4rem;
+        }
+
+        /* 打印样式：A4 */
+        @page {
+            size: A4;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+            }
+
+            .cv-page {
+                box-shadow: none;
+                margin: 0;
+                padding: 0;
+                max-width: none;
+                height:auto;
+            }
+
+            a {
+                color: #000000;
+                text-decoration: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="cv-page">
+
+        <section class="section">
+            <img src="assets/证件照.jpg" alt="证件照" style="float: right; width: 110px; padding-left: 10px;">
+            <h1>基本信息</h1>
+            <p>
+                <strong>姓名：</strong>高书捷
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <strong>性别：</strong>男
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <strong>民族：</strong>汉族
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <strong>出生年月：</strong>2005.09
+            </p>
+            <p>
+                <strong>邮箱：</strong>sergiogao@qq.com
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <strong>微信：</strong>sergiogao05
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <strong>个人主页：</strong> <a href = "http://gsjz.github.io" target="_blank">gsjz.github.io</a>
+            </p>
+        </section>
+
+        <section class="section">
+            <h1>教育经历</h1>
+            <div class="row3">
+                <span> 杭州电子科技大学 </span>
+                <span class="middle"> 计算机科学与技术 在读学士 </span>
+                <span class="right"> 2024.09 - 拟 2028.06 </span>
+            </div>
+        </section>
+
+        <section class="section">
+            <h1>科研 / 项目 / 工作经历</h>
+                <h2>《名字》</h2>
+                <div class="row">
+                    <span class="chip chip-purple">科研</span>
+                    <span class="chip chip-indigo">CCF-Z</span>
+                    <span class="chip">灌水</span>
+                    <span class="right">（时间）</span>
+                </div>
+
+                <h2>项目名字</h2>
+                <div class="row">
+                    <span class="chip chip-purple">项目</span>
+                    <span class="chip">机器学习</span>
+                    <span class="chip">PYTHON</span>
+                    <span class="right">（时间）</span>
+                </div>
+                <p>介绍</p>
+
+                <h2>公司名字 - 职位</h2>
+                <div class="row">
+                    <span class="chip chip-purple">实习</span>
+                    <span class="chip">摸鱼</span>
+                    <span class="right">（时间）</span>
+                </div>
+        </section>
+
+        <section class="section">
+            <h1>竞赛 / 证书</h1>
+
+            <h2>算法竞赛与程序设计类</h2>
+            <ul>
+                <li>
+                    ICPC-Regional 国际大学生程序设计竞赛亚洲区域赛
+                    <a style="color: silver;">银奖</a>
+                    （2025.11 上海）
+                </li>
+                <li>
+                    CCPC-Regional 中国大学生程序设计竞赛区域赛 todo（2025.12 重庆）
+                </li>
+                <li>
+                    CCF-CSP 计算机软件能力认证 todo（2025.12）
+                </li>
+                <li>
+                    PAT-A 攀拓计算机能力测评程序设计甲级 todo（2025.12）
+                </li>
+            </ul>
+
+            <h2>语言类</h2>
+            <ul>
+                <li>
+                    CET-6 大学英语六级考试
+                    <a style="color: brown;" href="assets/CET6_202506_330371251204712_1.pdf">通过</a>
+                    （2025.06）
+                </li>
+            </ul>
+        </section>
+    </main>
+</body>
+
+</html>
