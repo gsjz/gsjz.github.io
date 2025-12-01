@@ -1,5 +1,7 @@
 /* 通用小标签样式 */
-.md-typeset .chip {
+.md-typeset .chip,
+.md-typeset [class^="chip-"],
+.md-typeset [class*=" chip-"] {
   display: inline-flex;
   align-items: center;
   padding: 0 0.6em;

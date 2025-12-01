@@ -13,4 +13,30 @@
   filter: brightness(0.9);
 }
 
+.row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
 
+.row .right {
+  margin-left: auto;
+  white-space: nowrap;
+  font-size: 0.85em;
+  color: var(--md-default-fg-color--light);
+}
+
+.text-image-row {
+  display: flex;
+  align-items: flex-start;  /* 或 center，看你喜好 */
+  gap: 16px;                /* 文字和图片之间的间距 */
+}
+
+.text-image-row .text-part {
+  flex: 1;                  /* 文字占满左侧剩余空间 */
+}
+
+.text-image-row .image-part img {
+  max-width: 260px;         /* 控制图片宽度 */
+  height: auto;
+}

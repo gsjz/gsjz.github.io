@@ -18,7 +18,7 @@ The instructor gives a example that the possible value of Y is either 0 or 1. So
 
 ## reinforcement learning
 
-中文叫强化学习。
+中文叫强化学习。就是设计 reward，让机器根据自己行为的 reward 来调整。
 
 
 ## 英语学习

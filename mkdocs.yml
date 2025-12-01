@@ -31,6 +31,8 @@ nav:
       - 408考研/政治/思想道德期末.md
   - 机器学习:
     - 机器学习/index.md
+    - Kaggle 课程:
+      - 机器学习/Kaggle 课程/intro-to-machine-learning.md
     - SUCS229:
       - 机器学习/SUCS229/index.md
       - 机器学习/SUCS229/lec1.md
