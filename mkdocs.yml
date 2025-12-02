@@ -4,6 +4,95 @@ site_url: https://gsjz.github.io
 site_author: SergioGao
 site_description: 高书捷的主页
 
+theme:
+  name: material
+  
+  logo: images/GClef.svg
+  favicon: images/GClef_black.svg
+  
+  font:
+    code: Fira Code
+
+  palette:
+    - scheme: default
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/weather-night
+        name: 切换至夜间模式
+    # 夜间模式
+    - scheme: slate
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/weather-sunny
+        name: 切换至日间模式
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.indexes
+    - search.suggest
+    - content.code.copy
+    - navigation.tracking
+
+  language: zh
+copyright: SergioGao CC-BY-4.0
+
+extra:  
+  social:
+    - name: GitHub
+      icon: fontawesome/brands/github
+      link: https://github.com/gsjz
+  img_prefix: "https://raw.githubusercontent.com/gsjz/my-pic-bed/main/" 
+  # 图床宏
+
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+        - ja
+  - meta
+  - macros
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      linenums: true
+      auto_title: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: !relative
+  - admonition
+  - pymdownx.details
+  - footnotes
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_javascript:
+  - mkdocs/javascripts/katex.js
+  - mkdocs/javascripts/katex.min.js
+  - mkdocs/javascripts/copy-tex.js
+  - mkdocs/javascripts/auto-render.min.js
+  - mkdocs/javascripts/mermaid-init.js
+extra_css:
+  - mkdocs/css/katex.min.css
+  - mkdocs/css/no-footer.css
+  - mkdocs/css/unordered-list-symbols.css
+  - mkdocs/css/extra.css
+  - mkdocs/css/chip-color.css
+
 nav:
   - 408考研:
     - 408考研/index.md
@@ -94,93 +183,3 @@ nav:
         - yzl_lec4: XCPC/模板与课件/reveal.js/yzl_lec4.html
         - yzl_lec5: XCPC/模板与课件/reveal.js/yzl_lec5.html
         - yzl_lec6: XCPC/模板与课件/reveal.js/yzl_lec6.html  
-
-
-theme:
-  name: material
-  
-  logo: images/GClef.svg
-  favicon: images/GClef_black.svg
-  
-  font:
-    code: Fira Code
-
-  palette:
-    - scheme: default
-      primary: black
-      accent: orange
-      toggle:
-        icon: material/weather-night
-        name: 切换至夜间模式
-    # 夜间模式
-    - scheme: slate
-      primary: black
-      accent: orange
-      toggle:
-        icon: material/weather-sunny
-        name: 切换至日间模式
-  features:
-    - navigation.tabs
-    - navigation.top
-    - navigation.indexes
-    - search.suggest
-    - content.code.copy
-    - navigation.tracking
-
-  language: zh
-copyright: SergioGao CC-BY-4.0
-
-extra:  
-  social:
-    - name: GitHub
-      icon: fontawesome/brands/github
-      link: https://github.com/gsjz
-  img_prefix: "https://raw.githubusercontent.com/gsjz/my-pic-bed/main/" 
-  # 图床宏
-
-plugins:
-  - search:
-      lang:
-        - zh
-        - en
-        - ja
-  - meta
-  - macros
-markdown_extensions:
-  - pymdownx.arithmatex:
-      generic: true
-  - attr_list
-  - md_in_html
-  - toc:
-      permalink: true
-  - pymdownx.highlight:
-      linenums: true
-      auto_title: true
-      line_spans: __span
-      pygments_lang_class: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets:
-      base_path: !relative
-  - admonition
-  - pymdownx.details
-  - footnotes
-  - pymdownx.tabbed:
-      alternate_style: true
-  - pymdownx.superfences:
-      custom_fences:
-        - name: mermaid
-          class: mermaid
-          format: !!python/name:pymdownx.superfences.fence_code_format
-
-extra_javascript:
-  - mkdocs/javascripts/katex.js
-  - mkdocs/javascripts/katex.min.js
-  - mkdocs/javascripts/copy-tex.js
-  - mkdocs/javascripts/auto-render.min.js
-  - mkdocs/javascripts/mermaid-init.js
-extra_css:
-  - mkdocs/css/katex.min.css
-  - mkdocs/css/no-footer.css
-  - mkdocs/css/unordered-list-symbols.css
-  - mkdocs/css/extra.css
-  - mkdocs/css/chip-color.css
