@@ -40,3 +40,25 @@
   max-width: 260px;         /* 控制图片宽度 */
   height: auto;
 }
+
+/* 小屏（手机）优化 */
+
+@media (max-width: 768px) {
+  .text-image-row {
+    flex-direction: column;  /* 改成上下排布 */
+    align-items: stretch;    /* 文字占满整行 */
+  }
+
+  .text-image-row .text-part {
+    flex: none;
+  }
+
+  .text-image-row .image-part {
+    text-align: center;      /* 图片居中，可选 */
+  }
+
+  .text-image-row .image-part img {
+    max-width: 100%;         /* 图片宽度跟随屏幕 */
+    height: auto;
+  }
+}

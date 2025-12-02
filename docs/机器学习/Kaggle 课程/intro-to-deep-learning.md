@@ -1,4 +1,10 @@
+## activation
 
+激活函数。
+
+引入这个东西主要是考虑到若干个线性变换复合后还是线性变换。
+
+所以能起到弯曲决策边界的作用。
 
 ```python
 # YOUR CODE HERE: Change 'relu' to 'elu', 'selu', 'swish'... or something else
