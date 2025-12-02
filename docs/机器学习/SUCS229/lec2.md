@@ -9,8 +9,7 @@ https://www.youtube.com/watch?v=4b4MUYve_U8
     To describe the supervised learning problem slightly more formally, our goal is, given a training set, to learn a function h : $\mathcal{X} \rightarrow \mathcal{Y}$ so that $h(x)$ is a "good" predictor for the corresponding value of $y$. 
 
     For historical reasons, this function h is called a hypothesis. 
-
-    <img src="https://raw.githubusercontent.com/gsjz/my-pic-bed/main/20250921150717116.png"/ style="display:block; margin:0 auto; width:50%; ">
+    <img src="{{img_prefix}}20250921150717116.png"/ style="display:block; margin:0 auto; width:50%; ">
 
 比较简单的想法，就是找个尽量拟合样本点的函数，来预测非样本点处的信息。
 

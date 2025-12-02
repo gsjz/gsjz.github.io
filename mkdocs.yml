@@ -121,17 +121,18 @@ theme:
     - navigation.indexes
     - search.suggest
     - content.code.copy
-    
     - navigation.tracking
 
   language: zh
 copyright: SergioGao CC-BY-4.0
-extra:
-    
+
+extra:  
   social:
     - name: GitHub
       icon: fontawesome/brands/github
       link: https://github.com/gsjz
+  img_prefix: "https://raw.githubusercontent.com/gsjz/my-pic-bed/main/" 
+  # 图床宏
 
 plugins:
   - search:
@@ -140,6 +141,7 @@ plugins:
         - en
         - ja
   - meta
+  - macros
 markdown_extensions:
   - pymdownx.arithmatex:
       generic: true
