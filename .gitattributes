@@ -1,6 +1,6 @@
 *.md   linguist-documentation=false linguist-detectable=true
 *.html linguist-documentation=false linguist-detectable=true
-*.css linguist-documentation=false linguist-detectable=true
-*.js linguist-documentation=false linguist-detectable=true
+# *.css linguist-documentation=false linguist-detectable=true
+# *.js linguist-documentation=false linguist-detectable=true
 *.tex linguist-documentation=false linguist-detectable=true
 *.cpp linguist-documentation=false linguist-detectable=true
