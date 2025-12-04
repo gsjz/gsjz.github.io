@@ -24,6 +24,7 @@ feature_names = ['LotArea', 'YearBuilt', '1stFlrSF', '2ndFlrSF', 'FullBath', 'Be
 X = home_data[ feature_names ]
 ```
 
+
 ## DecisionTreeRegressor
 
 决策树回归模型
@@ -67,6 +68,23 @@ from sklearn.model_selection import train_test_split
 
 # fill in and uncomment
 train_X, val_X, train_y, val_y = train_test_split(X, y, random_state = 1)
+```
+
+视方便，有不同的写法来划分训练集和测试集、X 和 y。
+
+```
+import pandas as pd
+
+concrete = pd.read_csv('../input/dl-course-data/concrete.csv')
+df = concrete.copy()
+
+df_train = df.sample(frac=0.7, random_state=0)
+df_valid = df.drop(df_train.index)
+
+X_train = df_train.drop('CompressiveStrength', axis=1)
+X_valid = df_valid.drop('CompressiveStrength', axis=1)
+y_train = df_train['CompressiveStrength']
+y_valid = df_valid['CompressiveStrength']
 ```
 
 ## mean_absolute_error
