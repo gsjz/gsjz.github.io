@@ -1,5 +1,6 @@
 .vscode
-
+# 本地部署
+site/
 # tex 临时文件
 *.aux
 *.fdb_latexmk
