@@ -43,7 +43,7 @@ extra:
     - name: GitHub
       icon: fontawesome/brands/github
       link: https://github.com/gsjz
-  img_prefix: "https://raw.githubusercontent.com/gsjz/my-pic-bed/main/" 
+  img_prefix: "https://pic.shujie.cc/" 
   # 图床宏
 
 plugins:
