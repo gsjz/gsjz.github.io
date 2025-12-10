@@ -72,7 +72,7 @@ train_X, val_X, train_y, val_y = train_test_split(X, y, random_state = 1)
 
 视方便，有不同的写法来划分训练集和测试集、X 和 y。
 
-```
+```python
 import pandas as pd
 
 concrete = pd.read_csv('../input/dl-course-data/concrete.csv')

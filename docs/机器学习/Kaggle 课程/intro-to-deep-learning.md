@@ -246,7 +246,7 @@ model = keras.Sequential([
 
 可以这样去训练
 
-```
+```python
 model.compile(
     optimizer='sgd',
     loss='mae',
@@ -259,7 +259,7 @@ model.compile(
 
 pipeline 字面意思流水线。
 
-```
+```python
 import pandas as pd
 
 from sklearn.model_selection import train_test_split
