@@ -12,6 +12,7 @@ theme:
   
   font:
     code: Fira Code
+    text: Noto Sans SC
 
   palette:
     - scheme: default
@@ -87,7 +88,7 @@ extra_javascript:
   - mkdocs/javascripts/auto-render.min.js
   - mkdocs/javascripts/mermaid-init.js
 extra_css:
-  - mkdocs/css/katex.min.css
+  - mkdocs/css/katex/katex.min.css
   - mkdocs/css/no-footer.css
   - mkdocs/css/unordered-list-symbols.css
   - mkdocs/css/extra.css
