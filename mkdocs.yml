@@ -10,9 +10,7 @@ theme:
   logo: images/GClef.svg
   favicon: images/GClef_black.svg
   
-  font:
-    code: Fira Code
-    text: Noto Sans SC
+  font: false
 
   palette:
     - scheme: default
@@ -88,6 +86,8 @@ extra_javascript:
   - mkdocs/javascripts/auto-render.min.js
   - mkdocs/javascripts/mermaid-init.js
 extra_css:
+  - "https://cdn.shujie.cc/jbmono/setting.css"
+  - "https://cdn.shujie.cc/notoserif/setting.css"
   - mkdocs/css/katex/katex.min.css
   - mkdocs/css/no-footer.css
   - mkdocs/css/unordered-list-symbols.css

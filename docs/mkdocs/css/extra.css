@@ -1,3 +1,27 @@
+:root {
+  /* 正文混搭字体：英文 JetBrains Mono + 中文 fallback */
+  --md-text-font:
+    /* "JetBrains Mono", */
+    "Noto Serif SC",
+    "Noto Sans CJK SC",
+    "Noto Sans SC",
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+
+  /* 代码字体 */
+  --md-code-font:
+    "JetBrains Mono",
+    "Noto Serif SC",
+    "Noto Sans Mono CJK SC",
+    monospace;
+
+}
+
+
+
+
+
 /* ===== Mermaid 居中 ===== */
 .mermaid {
   display: block;
@@ -28,16 +52,20 @@
 
 .text-image-row {
   display: flex;
-  align-items: flex-start;  /* 或 center，看你喜好 */
-  gap: 16px;                /* 文字和图片之间的间距 */
+  align-items: flex-start;
+  /* 或 center，看你喜好 */
+  gap: 16px;
+  /* 文字和图片之间的间距 */
 }
 
 .text-image-row .text-part {
-  flex: 1;                  /* 文字占满左侧剩余空间 */
+  flex: 1;
+  /* 文字占满左侧剩余空间 */
 }
 
 .text-image-row .image-part img {
-  max-width: 260px;         /* 控制图片宽度 */
+  max-width: 260px;
+  /* 控制图片宽度 */
   height: auto;
 }
 
@@ -45,8 +73,10 @@
 
 @media (max-width: 768px) {
   .text-image-row {
-    flex-direction: column;  /* 改成上下排布 */
-    align-items: stretch;    /* 文字占满整行 */
+    flex-direction: column;
+    /* 改成上下排布 */
+    align-items: stretch;
+    /* 文字占满整行 */
   }
 
   .text-image-row .text-part {
@@ -54,11 +84,13 @@
   }
 
   .text-image-row .image-part {
-    text-align: center;      /* 图片居中，可选 */
+    text-align: center;
+    /* 图片居中，可选 */
   }
 
   .text-image-row .image-part img {
-    max-width: 100%;         /* 图片宽度跟随屏幕 */
+    max-width: 100%;
+    /* 图片宽度跟随屏幕 */
     height: auto;
   }
 }
