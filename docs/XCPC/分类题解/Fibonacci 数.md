@@ -51,6 +51,7 @@ The component $\sqrt{5}$ seems suspicious. Note that the $\sqrt{5}^{2k}-(-\sqrt{
 $$
 Fib_{n}=\frac{1}{2^{n-1}}\sum_{k}\binom{n}{2k+1}5^{k}
 $$
+
 Note that
 
 $$
@@ -62,17 +63,23 @@ $$
 ### tools from quadratic residue
 
 Well, the form is somehow similar to Euler's criterion, which is a topic of quadratic residue. Let's develop some about it. For $1,2,\cdots,p-1$, there are exactly $1/2$ of them can be represented as $a\equiv x^2 \pmod b$, which are defined with the name quadratic residue. So the rest $1/2$ must fit the second factor to be zero, in the following formula
+
 $$
 0\equiv a^{p-1}-1\equiv \left(a^{\frac{p-1}{2}}-1\right)\left(a^{\frac{p-1}{2}}+1\right)
 $$
+
 So $a^{\frac{p-1}{2}}$ can only have two possible value, which is determined by whether it is a quadratic residue.We yet now define this as the Legendre symbol, that is 
+
 $$
 \left(\frac{a}{p}\right) := a^{\frac{p-1}{2}}\bmod p
 $$
+
 Return to what we want to calculate, we want to know
+
 $$
 \left(\frac{5}{p}\right)
 $$
+
 How to translate this to a **finite** series of cases that can be checked enumeratively , since the $p$ are **infinite**? This is the motivation of 
 
 !!! note "quadratic reciprocity"
@@ -82,6 +89,7 @@ How to translate this to a **finite** series of cases that can be checked enumer
     $$
 
 Hence,  
+
 $$
 \left(\frac{5}{p}\right) = \left(\frac{p}{5}\right)^{-1} (-1)^{\frac{p-1}{2}2} = \left(\frac{p}{5}\right)
 $$
@@ -94,16 +102,20 @@ We list the enumerative results: for $1,4$, it's $1$; for $2,3$, it's $-1$.
 ### instant conclusions
 
 By applying the above tools, we can see
+
 #### p equiv 1,4 case
 
 $$
 Fib_{p}\equiv 1 \mod p
 $$
+
 $$
 Fib_{p+1}\equiv \frac{1}{2^p}(\binom{p+1}{1}+\binom{p+1}{p}
 5^{\frac{p-1}{2}})\equiv 1\mod p
 $$
+
 Then
+
 $$
 \begin{bmatrix}
 1 & 1\\
@@ -116,6 +128,7 @@ $$
 \end{bmatrix} 
 \mod p
 $$
+
 Hence $\pi(p)\mid (p-1)$ in this case.
 
 
@@ -128,17 +141,23 @@ This section doesn't include the equal $2$ case.
 $$
 Fib_{2p}\equiv \frac{1}{2}\binom{2p}{p}5^{\frac{p-1}{2}} \equiv -1 \mod p
 $$
+
 (First equiv, list $2p,2p-1,\cdots, p+1$, except $2p$ which we choose consume the front $2$ and match the $p$ in denominator to become $1$, the rest we $-p$, so the all becomes $1$. ) 
 
 !!! warning "Fun(?) mistake"
+
     Why don't I just choose $-p$ for $2p$, then get
+
     $$
     \binom{2p}{p}\color{red}\equiv\color{black} 1
     $$
+
     Then combine the former method
+
     $$
     2\equiv \binom{2p}{p}\color{red}\equiv\color{black} 1 \mod p
     $$
+
     WTF? The number theory is wrong at all!
 
 !!! Tip for the mistake
@@ -153,6 +172,7 @@ Fib_{2p+1}&\equiv \frac{1}{4}(\binom{2p+1}{1}+\binom{2p+1}{p}5^{\frac{p-1}{2}}+\
 $$
 
 and
+
 $$
 Fib_{2p+2}\equiv 0 \mod p
 $$
@@ -161,16 +181,20 @@ $$
 
 !!! question "Why not calculate 2p+2 directly?"
     Of course, if we assume $p$ is sufficiently big, it's OK, just calculate 2 more items. But if not, notice that 
+
     $$
     \binom{2p+2}{3}
     $$
+
     is not equiv $0$ when $p=3$. I have mentioned the reason in Fun mistake.
 
 
 $$
 Fib_{2p+3}\equiv 1 \mod p
 $$
+
 Then
+
 $$
 \begin{bmatrix}
 1 & 1\\
@@ -183,11 +207,13 @@ $$
 \end{bmatrix} 
 \mod p
 $$
+
 Hence $\pi(p)\mid (2p+2)$ in this case.
 
 #### p equal 2,5 case
 
 It's just a bruteforce problem.
+
 $$
 \pi(2)=3,\pi(5)=20
 $$
@@ -199,13 +225,17 @@ Yet now we finished the single prime case. The rest work is to lift the power of
 In the previous part we basically consider $\mathbb Z_n$, hence we can utilize the quadratic residue. The following part, we switch to $\mathbb Z_{n}(\sqrt{5})$, here $\sqrt{5}$ is no longer corresponding to any element in $\mathbb Z_n$, but serves with $1$ as a basis for the extension field.
 
 For $t$ which follows
+
 $$
 F_{t}\equiv 0, F_{t+1}\equiv 1 \mod p^{k-1}
 $$
+
 here $k\ge 2$, can be equivalent to
+
 $$
 \left(\frac{1+\sqrt{5}}{2}\right)^{t}\equiv \left(\frac{1-\sqrt{5}}{2}\right)^{t} \equiv 1 \mod p^{k-1}
 $$
+
 here $1$ actually means the coefficent of $\sqrt 5$ is $0$ in $\mathbb Z_{p^{k-1}}$. The form allows us to lift the exponent of modulo number. Set
 
 $$
@@ -213,14 +243,19 @@ $$
 $$
 
 Then
+
 $$
 (ap^{k-1}+bp^{k-1}\sqrt 5+1)^{p}=\sum\binom{p}{j}((a+b\sqrt{5})p^{k-1})^{j}
 $$
+
 The item $\binom{p}{j}$ always contribute a factor $p$, except case that $j=p,0$. And $p^{(k-1)j}$ always greater than or equal to $p^{k}$ except $j=1,0$, futhermore, because of the contribution form $\binom{p}{1}$, makes $j=1$ case no longer an exception now. So
+
 $$
 (ap^{k-1}+bp^{k-1}\sqrt 5+1)^{p}\equiv 1 \mod p^{k}
 $$
+
 This means
+
 $$
 \pi(p^{k})\mid p\pi(p^{k-1})\mid p^{k-1}\pi(p)
 $$
@@ -230,6 +265,7 @@ $$
 Because of longest common multiple merging, we extract factor $4$ from every contribution, much as possible, then denote the rest contribution as $\pi'$. Obviously the $2p+2$ can be reduced to at least $\frac{p+1}{2}<p$. After that, except $\pi'(2)=3$, every contribution from $\pi'(x)$ would not greater than $x$.
 
 So
+
 $$
 \pi(n)\le  4 \cdot (\prod_{x|n,x\text{ is prime}} \frac{\pi'(x)}{x}) \cdot n \le 6n
 $$
@@ -241,27 +277,34 @@ Below is NOT necessary for the mentioned problem CF2033F. But I just throw a sim
 [Fibonacci GCD’s, please – Math Fun Facts](https://math.hmc.edu/funfacts/fibonacci-gcds-please/)
 
 We have
+
 $$
 Fib_{\gcd(n,m)}=\gcd(Fib_{n},Fib_m)
 $$
 
 !!! note "Central technique to prove it: Fibonacci decomposition"
     We can resolve
+
     $$
     Fib_{m+n}
     $$
+
     into
+
     $$
     Fib_{m+1}Fib_{n}+Fib_{m}Fib_{n-1}
     $$
+
     basically due to the initial values make $n=1,2$ case obviously true, and then the recursion leads mathematical induction with respect to $n$.
 
 Then take advantage of GCD funtion's properties:
+
 $$
 \gcd(a,b)=\gcd(a-b,b)
 $$
 
 and
+
 $$
 \gcd(c,b)=1\implies \gcd(ac,b)=\gcd(a,b)
 $$
