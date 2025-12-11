@@ -78,6 +78,7 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+      
 
 extra_javascript:
   - mkdocs/javascripts/katex.js
@@ -147,8 +148,12 @@ nav:
 
   - 技能拾遗:
     - 技能拾遗/index.md
-    - Git:
-      - 技能拾遗/Git/规范.md
+    - git:
+      - 技能拾遗/git/规范.md
+      - 技能拾遗/git/命令行.md
+    - hash:
+      - 技能拾遗/hash/md5.md
+      - 技能拾遗/hash/sha256.md
 
   - XCPC:
     - XCPC/index.md
