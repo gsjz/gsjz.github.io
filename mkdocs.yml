@@ -154,6 +154,8 @@ nav:
     - hash:
       - 技能拾遗/hash/md5.md
       - 技能拾遗/hash/sha256.md
+    - linux:
+      - 技能拾遗\linux\虚拟机网络代理.md
 
   - XCPC:
     - XCPC/index.md
