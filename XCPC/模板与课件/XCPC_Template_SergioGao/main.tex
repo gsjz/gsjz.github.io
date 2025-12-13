@@ -1,0 +1,96 @@
+\documentclass[openany]{ctexbook}      
+
+\usepackage{silence}
+% 过滤字体相关与 Underfull 提示
+\WarningFilter{latexfont}{Size substitutions}
+\WarningFilter{latexfont}{Font shape}
+\WarningFilter{latex}{Underfull \vbox}
+\WarningFilter{latex}{Underfull \hbox}
+% 降低 Underfull/Overfull 的敏感度（可选）
+\hbadness=10000
+\vbadness=10000
+
+\usepackage{microtype}
+\emergencystretch=3em
+
+\usepackage{pdfpages}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+
+\usepackage{inconsolata}
+\lstset{
+  language=C++,               
+  basicstyle=\ttfamily\small, 
+  keywordstyle=\color{blue}, 
+  commentstyle=\color{gray},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  breaklines=true,
+  frame=single,
+  columns=fullflexible,
+}
+
+\usepackage[
+    hidelinks,         
+    bookmarksopen=true,
+    bookmarksnumbered=true, 
+    unicode=true       
+]{hyperref}
+
+\hypersetup{
+    colorlinks=true,    
+    linkcolor=blue,     
+    urlcolor=red,      
+    citecolor=magenta 
+}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+
+\usepackage{amsmath}
+
+
+\title{XCPC 算法竞赛模板}
+\author{Sergio Gao}
+
+
+
+\ctexset{
+    chapter = {
+        format = \centering\zihao{2}\songti\bfseries,
+        name = {第\space, \space 章},
+        number = \arabic{chapter},
+    }
+}
+\ctexset{
+    section = {
+        format = \centering\zihao{-2}\songti\bfseries, 
+    }
+}
+\ctexset{
+    subsection = {
+        format = \centering\zihao{-3}\songti\bfseries, 
+    }
+}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\include{Graph_Theory/Graph_Theory}
+
+\include{Convex_Optimization/Convex_Optimization}
+
+\include{Computing_Geometry/Computing_Geometry}
+
+\include{Math/Math}
+
+\include{String/String}
+
+\include{Data_Structure/Data_Structure}
+
+\end{document}
+
+

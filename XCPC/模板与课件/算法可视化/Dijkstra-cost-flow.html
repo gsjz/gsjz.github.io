@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>最小费用最大流（Dijkstra+势能）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="js/d3.v7.min.js"></script>
+  <style>
+    :root{ --bg:#ffffff; --panel:#f6f7f9; --ink:#111827; --muted:#6b7280; --accent:#2563eb; --bad:#dc2626; --edge:#1f2937; --edge-disabled:#e5e7eb; --shadow:0 4px 18px rgba(0,0,0,.08); }
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system, Segoe UI, Roboto, 'Noto Sans CJK SC', sans-serif}
+    #app{display:flex;height:100vh;overflow:hidden}
+
+    #sidebar{width:440px;min-width:340px;max-width:560px;background:var(--panel);border-right:1px solid #e5e7eb;display:flex;flex-direction:column;gap:12px;padding:14px;box-sizing:border-box}
+    #sidebar h1{font-size:16px;margin:0 0 8px}
+    .row{display:flex;gap:8px;align-items:center}
+    label{font-size:12px;color:var(--muted)}
+
+    .preset{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+    select, textarea{width:100%;box-sizing:border-box;border:1px solid #d1d5db;border-radius:10px;background:#fff}
+    select{height:36px;padding:0 10px}
+    textarea{height:170px;resize:vertical;padding:10px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace}
+
+    .controls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .controls button{padding:8px 10px;border:1px solid #d1d5db;border-radius:10px;background:#fff;cursor:pointer;box-shadow:var(--shadow)}
+    .controls button.primary{background:var(--accent);color:#fff;border-color:transparent}
+    .controls button:disabled{opacity:.6;cursor:not-allowed}
+
+    #legend{font-size:12px;color:var(--muted);display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}
+    #legend .swatch{width:22px;height:4px;border-radius:2px}
+    #legend .dot{width:10px;height:10px;border-radius:50%}
+
+    #preview{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px}
+    #preview .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+    #preview .path{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;white-space:pre-wrap}
+    #preview .stepper{display:flex;gap:8px;align-items:center;margin-top:8px}
+    #preview .stepper button{padding:4px 8px;border:1px solid #d1d5db;border-radius:8px;background:#fff;cursor:pointer}
+
+    #hint{font-size:12px;color:var(--muted);line-height:1.3}
+
+    #log{flex:1;overflow:auto;background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:10px;white-space:pre-wrap}
+
+    #stage{position:relative;flex:1}
+    svg{width:100%;height:100%;display:block;background:#fff}
+
+    .node{cursor:grab}
+    .node:active{cursor:grabbing}
+    .node circle{fill:#fff;stroke:#cbd5e1;stroke-width:2}
+    .node text{pointer-events:none;font-weight:600;fill:var(--ink)}
+
+    .link-path{fill:none;stroke:var(--edge);stroke-width:1.8;marker-end:url(#arrowStrong)}
+    .link-muted{stroke:var(--edge-disabled)}
+
+    .overlay-path{fill:none;stroke:var(--accent);stroke-width:8;stroke-opacity:.12;marker-end:url(#arrowAccent)}
+    .overlay-path.seg{stroke-width:3;stroke-opacity:1;marker-end:url(#arrowAccent)}
+    .overlay-path.back{stroke:var(--bad);stroke-dasharray:6 6;marker-end:url(#arrowBad)}
+
+    .edge-label{font:12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;fill:#111;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+
+    .toast{position:absolute;left:50%;top:18px;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 12px;border-radius:999px;box-shadow:var(--shadow);opacity:0;transition:opacity .25s,transform .25s}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* 快捷键速查浮层 */
+    #cheatsheet{position:absolute;right:16px;bottom:16px;background:#111827;color:#fff;border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);font-size:12px;line-height:1.5;opacity:.92}
+    #cheatsheet h3{margin:0 0 6px;font-size:12px;color:#93c5fd}
+    #cheatsheet kbd{background:#374151;border-radius:6px;padding:2px 6px;margin:0 3px}
+  </style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <h1>最小费用最大流</h1>
+
+    <div class="preset">
+      <select id="preset">
+        <option value="p_simple">预设 A</option>
+        <option value="p_chain">预设 B</option>
+        <option value="p_parallel">预设 C</option>
+        <option value="p_bidir">预设 D</option>
+      </select>
+      <button id="applyPreset">应用预设</button>
+    </div>
+
+    <div class="row"><label>输入格式（首行: n m s t；后续: u v cap cost，均为 1-based）：</label></div>
+    <textarea id="input"></textarea>
+
+    <div class="controls">
+      <button id="load" class="primary">加载图</button>
+      <button id="reset">重置流量</button>
+      <button id="run">跑到结束</button>
+      <button id="find">找最短路</button>
+      <button id="confirm" disabled>执行增广</button>
+      <button id="cancel" disabled>取消预览</button>
+    </div>
+
+    <div id="legend">
+      <div class="swatch" style="background:var(--edge);"></div><div>原始方向边（有向箭头）</div>
+      <div class="swatch" style="background:var(--edge-disabled);"></div><div>cap=0 的原边（已满）</div>
+      <div class="swatch" style="background:var(--accent);"></div><div>最短路预览/增广（正向）</div>
+      <div class="swatch" style="background:var(--bad);"></div><div>最短路中的反向（回退流）</div>
+    </div>
+
+    <div id="preview" aria-label="preview">
+      <div class="header"><b>预览最短路</b><span id="meta" style="color:var(--muted)">— 无</span></div>
+      <div id="pathText" class="path">（按 F 可快速“找最短路”；Enter 执行增广；Esc 取消）</div>
+      <div class="stepper">
+        <button id="stepPrev" disabled>◀ 边</button>
+        <span id="stepInfo" style="min-width:80px;text-align:center">0/0</span>
+        <button id="stepNext" disabled>边 ▶</button>
+      </div>
+      <div id="hint">鼠标：右键=下一段，中键=上一段；键盘详见右下角速查。</div>
+    </div>
+
+    <div id="log" aria-label="log"></div>
+  </aside>
+
+  <main id="stage">
+    <svg id="svg"></svg>
+    <div id="toast" class="toast"></div>
+    <div id="cheatsheet" hidden>
+      <h3>快捷键</h3>
+      <div><kbd>F</kbd> 找最短路（预览）</div>
+      <div><kbd>Enter</kbd> 执行增广　<kbd>Esc</kbd> 取消预览</div>
+      <div><kbd>Space</kbd>/<kbd>→</kbd>/<kbd>J</kbd> 下一段　<kbd>←</kbd>/<kbd>Backspace</kbd>/<kbd>K</kbd> 上一段</div>
+      <div><kbd>R</kbd> 跑到结束　<kbd>Z</kbd> 重置流量　<kbd>L</kbd> 加载图</div>
+      <div><kbd>P</kbd> 应用当前预设　<kbd>?</kbd>/<kbd>H</kbd> 显示/隐藏此速查</div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function(){
+  // ===== 工具 =====
+  function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1200); }
+  const logEl = document.getElementById('log');
+  function log(msg){ logEl.textContent += msg + "\n"; logEl.scrollTop = logEl.scrollHeight; }
+  function clearLog(){ logEl.textContent=''; }
+  function inEditable(e){ const t=e.target; const tag=t.tagName; return tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||t.isContentEditable; }
+
+  // ===== 预设 =====
+  const presets = {
+    p_bidir: `5 11 1 5\n1 2 1 0\n1 3 1 2\n2 3 1 0\n2 3 1 1\n3 2 1 0\n3 2 1 2\n3 4 1 0\n2 4 1 5\n4 5 2 0\n1 4 1 3\n2 5 1 9`,
+    p_simple: `4 5 1 4\n1 2 1 0\n2 3 1 0\n3 4 1 0\n1 3 1 1\n2 4 1 2`,
+    p_chain: `8 11 1 8\n1 2 1 0\n1 3 1 0\n1 4 1 0\n2 5 1 0\n2 6 1 0\n3 5 1 0\n3 7 1 2\n4 6 1 0\n5 8 1 0\n6 8 1 0\n7 8 1 0`,
+    p_parallel: `4 7 1 4\n1 2 1 0\n2 3 1 0\n3 4 1 0\n1 3 1 1\n1 3 1 3\n2 4 1 2\n2 4 1 5`
+  };
+  const presetSel = document.getElementById('preset');
+  const inputEl = document.getElementById('input');
+  document.getElementById('applyPreset').addEventListener('click', ()=>{ inputEl.value = presets[presetSel.value] || presets.p_bidir; });
+  inputEl.value = presets.p_bidir; // 默认
+
+  // ===== 解析输入 =====
+  function parseInput(text){
+    const lines = text.split(/\n|\r/).map(s=>s.trim()).filter(s=>s && !/^#/.test(s));
+    if(lines.length===0) throw new Error('输入为空');
+    const [n,m,s,t] = lines[0].split(/\s+/).map(Number);
+    if(!Number.isInteger(n)||!Number.isInteger(m)||!Number.isInteger(s)||!Number.isInteger(t)) throw new Error('首行应为：n m s t（整数）');
+    const edges=[]; let id=0;
+    for(let i=1;i<lines.length;i++){
+      const a = lines[i].split(/\s+/).map(Number); if(a.length<4) continue;
+      const [u,v,cap,cost] = a; edges.push({u:u-1, v:v-1, cap:+cap, cost:+cost, id:id++});
+    }
+    return {n, m:edges.length, s:s-1, t:t-1, edges};
+  }
+
+  // ===== 残量网络 =====
+  function buildResidual(n,s,t,edges){
+    const adj = Array.from({length:n}, ()=>[]);
+    const resEdges = []; const origMap = new Map();
+    function addEdge(u,v,cap,cost,origId){
+      const idx = resEdges.length;
+      resEdges.push({u:u, v:v, cap:cap, cost:cost, rev:idx+1, origId:origId, forward:true});
+      resEdges.push({u:v, v:u, cap:0, cost:-cost, rev:idx, origId:origId, forward:false});
+      adj[u].push(idx); adj[v].push(idx+1);
+      if(origId!=null) origMap.set(origId, idx);
+    }
+    for(const e of edges) addEdge(e.u,e.v,e.cap,e.cost,e.id);
+    const orig = edges.map(e=>({u:e.u,v:e.v,cap0:e.cap,cost:e.cost,id:e.id}));
+    return {n,s,t,adj,resEdges,orig,origMap,maxf:0,minc:0,h:null};
+  }
+
+  // ===== 算法 =====
+  function spfaInit(graph){
+    const {n,s,adj,resEdges} = graph; const INF=1e18; const h = Array(n).fill(INF);
+    const inq = Array(n).fill(false), q=[]; h[s]=0; q.push(s); inq[s]=true;
+    while(q.length){ const u=q.shift(); inq[u]=false; for(const ei of adj[u]){ const e=resEdges[ei]; if(e.cap>0 && h[e.v] > h[u] + e.cost){ h[e.v]=h[u]+e.cost; if(!inq[e.v]){inq[e.v]=true; q.push(e.v);} } } }
+    graph.h = h.map(x=>x>=INF/2?0:x);
+  }
+  function dijkstra(graph){
+    const {n,s,t,adj,resEdges,h} = graph; const INF=1e18;
+    const dist=Array(n).fill(INF), used=Array(n).fill(false), prev=Array(n).fill(null); dist[s]=0;
+    for(let it=0; it<n; it++){
+      let u=-1,b=INF; for(let i=0;i<n;i++) if(!used[i]&&dist[i]<b){b=dist[i];u=i;} if(u===-1) break; used[u]=true;
+      for(const ei of adj[u]){ const e=resEdges[ei]; if(e.cap<=0) continue; const rc=e.cost + h[u] - h[e.v]; if(dist[e.v] > dist[u] + rc){ dist[e.v]=dist[u]+rc; prev[e.v]={u,ei}; } }
+    }
+    if(!prev[t]) return null;
+    const realDist = dist[t] + h[t] - h[s];
+    for(let i=0;i<n;i++) if(dist[i]<1e17) h[i]+=dist[i];
+    let v=t, bottleneck=Infinity, path=[]; while(v!==s){ const {u,ei}=prev[v]; const e=graph.resEdges[ei]; bottleneck=Math.min(bottleneck,e.cap); path.push({u,v,ei}); v=u; } path.reverse();
+    return {path,bottleneck,realDist};
+  }
+  function findShortestPath(graph){ if(!graph.h) spfaInit(graph); return dijkstra(graph); }
+  function applyAugment(graph, path, bottleneck, realDist){ for(const step of path){ const e=graph.resEdges[step.ei]; const er=graph.resEdges[e.rev]; e.cap-=bottleneck; er.cap+=bottleneck; } graph.maxf+=bottleneck; graph.minc+=bottleneck*realDist; return {costInc:bottleneck*realDist}; }
+
+  // ===== 可视化：分轨 + 错位标签 =====
+  const svg = d3.select('#svg');
+  const defs = svg.append('defs');
+  defs.append('marker').attr('id','arrowStrong').attr('viewBox','0 -5 10 10').attr('refX',18).attr('refY',0).attr('markerWidth',9).attr('markerHeight',9).attr('orient','auto').append('path').attr('d','M0,-5L10,0L0,5').attr('fill','var(--edge)');
+  defs.append('marker').attr('id','arrowAccent').attr('viewBox','0 -5 10 10').attr('refX',16).attr('refY',0).attr('markerWidth',7).attr('markerHeight',7).attr('orient','auto').append('path').attr('d','M0,-5L10,0L0,5').attr('fill','var(--accent)');
+  defs.append('marker').attr('id','arrowBad').attr('viewBox','0 -5 10 10').attr('refX',16).attr('refY',0).attr('markerWidth',7).attr('orient','auto').append('path').attr('d','M0,-5L10,0L0,5').attr('fill','var(--bad)');
+
+  const gLinks = svg.append('g').attr('class','links');
+  const gOverlay = svg.append('g').attr('class','overlay');
+  const gNodes = svg.append('g').attr('class','nodes');
+
+  let current = null; // {graph, nodes, visEdges, preview, history}
+
+  function layoutNodes(n){
+    const {width,height} = svg.node().getBoundingClientRect();
+    const cx=width/2, cy=height/2, R=Math.max(120, Math.min(width,height)/2 - 80);
+    return Array.from({length:n},(_,i)=>{ const ang=(2*Math.PI*i)/n - Math.PI/2; return {id:i, x:cx+R*Math.cos(ang), y:cy+R*Math.sin(ang)}; });
+  }
+
+  function buildVisEdges(graph){
+    const list = graph.orig.map(e=>({u:e.u,v:e.v,cap0:e.cap0,cost:e.cost,id:e.id}));
+    const byPair = new Map();
+    for(const e of list){ const a=Math.min(e.u,e.v), b=Math.max(e.u,e.v); const k=`${a}-${b}`; if(!byPair.has(k)) byPair.set(k,{a,b,fwd:[],rev:[]}); const bucket=byPair.get(k); if(e.u===a && e.v===b) bucket.fwd.push(e); else bucket.rev.push(e); }
+    const vis=[]; for(const {a,b,fwd,rev} of byPair.values()){
+      const signBase=(a<b)?+1:-1;
+      const cntF=fwd.length; for(let i=0;i<cntF;i++){ const e=fwd[i]; const offset=(i-(cntF-1)/2)*0.14; const curved=signBase*(0.26+offset); const tpos=cntF===1?0.42:0.32+i/(cntF-1)*0.2; const labelDy=signBase*(i-(cntF-1)/2)*10; vis.push({...e, curved, tpos, labelDy}); }
+      const cntR=rev.length; for(let i=0;i<cntR;i++){ const e=rev[i]; const offset=(i-(cntR-1)/2)*0.14; const curved=-signBase*(0.26+offset); const tpos=cntR===1?0.58:0.68 - i/(cntR-1)*0.2; const labelDy=-signBase*(i-(cntR-1)/2)*10; vis.push({...e, curved, tpos, labelDy}); }
+    }
+    return vis;
+  }
+
+  function controlPoint(x1,y1,x2,y2,curved){ const mx=(x1+x2)/2, my=(y1+y2)/2; if(Math.abs(curved)<1e-6) return {x:mx,y:my}; const dx=x2-x1, dy=y2-y1; const len=Math.hypot(dx,dy)||1; const nx=-dy/len, ny=dx/len; const k=curved*64; return {x:mx+nx*k, y:my+ny*k}; }
+  function pathD(x1,y1,x2,y2,curved){ if(Math.abs(curved)<1e-6) return `M${x1},${y1} L${x2},${y2}`; const c=controlPoint(x1,y1,x2,y2,curved); return `M${x1},${y1} Q${c.x},${c.y} ${x2},${y2}`; }
+  function quadPoint(p0,p1,pc,t){ const x=(1-t)*(1-t)*p0.x + 2*(1-t)*t*pc.x + t*t*p1.x; const y=(1-t)*(1-t)*p0.y + 2*(1-t)*t*pc.y + t*t*p1.y; return {x,y}; }
+  function quadTangent(p0,p1,pc,t){ const dx=2*(1-t)*(pc.x-p0.x) + 2*t*(p1.x-pc.x); const dy=2*(1-t)*(pc.y-p0.y) + 2*t*(p1.y-pc.y); return {dx,dy}; }
+
+  function currentFlowOnOrigEdge(graph, orig){ const fi=graph.origMap.get(orig.id); const fwd=graph.resEdges[fi]; return orig.cap0 - fwd.cap; }
+
+  function drawAll(){
+    const {nodes, visEdges, graph} = current;
+    const linkSel = gLinks.selectAll('g.link').data(visEdges, d=>d.id);
+    const linkEnter = linkSel.enter().append('g').attr('class','link');
+    linkEnter.append('path').attr('class','link-path');
+    linkEnter.append('text').attr('class','edge-label');
+    const all = linkEnter.merge(linkSel);
+
+    all.select('path.link-path')
+      .attr('d', d=> pathD(nodes[d.u].x,nodes[d.u].y,nodes[d.v].x,nodes[d.v].y,d.curved))
+      .classed('link-muted', d=>{ const fi=graph.origMap.get(d.id); return graph.resEdges[fi].cap===0; });
+
+    all.select('text.edge-label')
+      .each(function(d){
+        const p0={x:nodes[d.u].x,y:nodes[d.u].y}; const p1={x:nodes[d.v].x,y:nodes[d.v].y};
+        const pc=controlPoint(p0.x,p0.y,p1.x,p1.y,d.curved); const t=d.tpos || .5;
+        const pt=quadPoint(p0,p1,pc,t); const tg=quadTangent(p0,p1,pc,t); const L=Math.hypot(tg.dx,tg.dy)||1; const nx=-tg.dy/L, ny=tg.dx/L;
+        const x=pt.x + nx*(d.labelDy||0); const y=pt.y + ny*(d.labelDy||0);
+        d3.select(this).attr('x',x).attr('y',y);
+      })
+      .attr('text-anchor','middle')
+      .text(d=>`${currentFlowOnOrigEdge(graph,d)}/${d.cap0} | ${d.cost}`);
+
+    linkSel.exit().remove();
+
+    const nodeSel = gNodes.selectAll('g.node').data(nodes, d=>d.id);
+    const nodeEnter = nodeSel.enter().append('g').attr('class','node').call(d3.drag().on('start',dragStart).on('drag',dragged).on('end',dragEnd));
+    nodeEnter.append('circle').attr('r',18);
+    nodeEnter.append('text').attr('dy','0.35em').attr('font-size',13).text(d=>d.id+1);
+    nodeEnter.append('title').text(d=>`节点 ${d.id+1}`);
+    nodeEnter.merge(nodeSel).attr('transform', d=>`translate(${d.x},${d.y})`);
+    nodeSel.exit().remove();
+  }
+
+  function updateGeometry(){ if(!current) return; const {nodes} = current; gLinks.selectAll('g.link').select('path.link-path').attr('d', d=> pathD(nodes[d.u].x,nodes[d.u].y,nodes[d.v].x,nodes[d.v].y,d.curved)); gLinks.selectAll('g.link').select('text.edge-label').each(function(d){ const p0={x:nodes[d.u].x,y:nodes[d.u].y}; const p1={x:nodes[d.v].x,y:nodes[d.v].y}; const pc=controlPoint(p0.x,p0.y,p1.x,p1.y,d.curved); const t=d.tpos || .5; const pt=quadPoint(p0,p1,pc,t); const tg=quadTangent(p0,p1,pc,t); const L=Math.hypot(tg.dx,tg.dy)||1; const nx=-tg.dy/L, ny=tg.dx/L; const x=pt.x + nx*(d.labelDy||0); const y=pt.y + ny*(d.labelDy||0); d3.select(this).attr('x',x).attr('y',y); }); gNodes.selectAll('g.node').attr('transform', d=>`translate(${d.x},${d.y})`); }
+
+  function refreshLabels(){ const {graph}=current; gLinks.selectAll('g.link').select('text.edge-label').text(d=>`${currentFlowOnOrigEdge(graph,d)}/${d.cap0} | ${d.cost}`); gLinks.selectAll('g.link').select('path.link-path').classed('link-muted', d=>{ const fi=graph.origMap.get(d.id); return graph.resEdges[fi].cap===0; }); }
+
+  function getCurvedFor(u,v){ const ve=current.visEdges.find(x=>x.u===u && x.v===v); if(ve) return ve.curved; const opp=current.visEdges.find(x=>x.u===v && x.v===u); return opp? -opp.curved : 0; }
+  function highlightPath(steps,k){ gOverlay.selectAll('*').remove(); if(!steps||steps.length===0) return; const {nodes}=current; const upto=Math.min(k==null?steps.length:k, steps.length); for(let i=0;i<upto;i++){ const st=steps[i]; const curved=getCurvedFor(st.u,st.v); const d = pathD(nodes[st.u].x,nodes[st.u].y,nodes[st.v].x,nodes[st.v].y, curved); const cls='overlay-path seg'+(st.backward?' back':''); gOverlay.append('path').attr('class',cls).attr('d',d); } }
+
+  // ===== 交互：拖拽、预览、快捷键 =====
+  function dragStart(event,d){ d3.select(this).raise(); }
+  function dragged(event,d){ d.x=event.x; d.y=event.y; updateGeometry(); if(current && current.preview) highlightPath(current.preview.steps, current.preview.k); }
+  function dragEnd(event,d){}
+
+  const metaEl=document.getElementById('meta'); const pathTextEl=document.getElementById('pathText'); const stepPrevBtn=document.getElementById('stepPrev'); const stepNextBtn=document.getElementById('stepNext'); const stepInfoEl=document.getElementById('stepInfo');
+  function setPreview(pre){ current.preview=pre; document.getElementById('confirm').disabled=!pre; document.getElementById('cancel').disabled=!pre; stepPrevBtn.disabled=!pre; stepNextBtn.disabled=!pre; if(!pre){ metaEl.textContent='— 无'; pathTextEl.textContent='（按 F 找最短路；Enter 执行增广；Esc 取消）'; stepInfoEl.textContent='0/0'; gOverlay.selectAll('*').remove(); return; } const seq=pre.steps.map(s=>`${s.u+1}→${s.v+1}`).join(' , '); metaEl.textContent=`Δ=${pre.bottleneck} , dist=${pre.realDist}`; pathTextEl.textContent=`路径：${seq}`; stepInfoEl.textContent=`${pre.k}/${pre.steps.length}`; highlightPath(pre.steps, pre.k); }
+  function buildStepsFromPath(path){ const steps=path.map(({u,ei})=>{ const e=current.graph.resEdges[ei]; let backward=!e.forward; return {u:e.u,v:e.v,backward}; }); return steps; }
+
+  function doFind(){ if(!current){ toast('先加载图'); return; } const ret=findShortestPath(current.graph); if(!ret){ toast('不可达：无最短路'); setPreview(null); log('不可达：算法结束'); return; } const steps=buildStepsFromPath(ret.path); setPreview({steps, bottleneck:ret.bottleneck, realDist:ret.realDist, k:1}); }
+  function stepNext(){ if(!current||!current.preview){ toast('先按 F 找最短路'); return; } current.preview.k=Math.min(current.preview.steps.length, (current.preview.k||1)+1); stepInfoEl.textContent=`${current.preview.k}/${current.preview.steps.length}`; highlightPath(current.preview.steps, current.preview.k); }
+  function stepPrev(){ if(!current||!current.preview){ toast('先按 F 找最短路'); return; } current.preview.k=Math.max(1, (current.preview.k||1)-1); stepInfoEl.textContent=`${current.preview.k}/${current.preview.steps.length}`; highlightPath(current.preview.steps, current.preview.k); }
+
+  document.getElementById('find').addEventListener('click', doFind);
+  stepNextBtn.addEventListener('click', stepNext);
+  stepPrevBtn.addEventListener('click', stepPrev);
+
+  // 右键/中键：预览区域 & 舞台均可
+  const previewBox = document.getElementById('preview');
+  const stageBox = document.getElementById('stage');
+  function bindMouseShortcuts(el){
+    el.addEventListener('contextmenu', (e)=>{ e.preventDefault(); stepNext(); });
+    el.addEventListener('pointerdown', (e)=>{
+      if(e.button===2){ e.preventDefault(); stepNext(); }
+      if(e.button===1){ e.preventDefault(); stepPrev(); }
+    });
+  }
+  bindMouseShortcuts(previewBox); bindMouseShortcuts(stageBox);
+
+  // 键盘快捷键
+  const cheatsheet = document.getElementById('cheatsheet');
+  function toggleSheet(){ cheatsheet.hidden = !cheatsheet.hidden; }
+  window.addEventListener('keydown', (e)=>{
+    if(inEditable(e)) return; // 在输入框里不抢快捷键
+    if(e.key==='?' || e.key==='h' || e.key==='H'){ e.preventDefault(); toggleSheet(); return; }
+    if(e.key==='f' || e.key==='F'){ e.preventDefault(); doFind(); return; }
+    if(e.code==='ArrowRight' || e.code==='Space' || e.key==='j' || e.key==='J'){ e.preventDefault(); stepNext(); return; }
+    if(e.code==='ArrowLeft' || e.code==='Backspace' || e.key==='k' || e.key==='K'){ e.preventDefault(); stepPrev(); return; }
+    if(e.key==='Enter' && !e.ctrlKey){ e.preventDefault(); document.getElementById('confirm').click(); return; }
+    if(e.key==='Escape'){ e.preventDefault(); document.getElementById('cancel').click(); return; }
+    if(e.key==='r' || e.key==='R'){ e.preventDefault(); document.getElementById('run').click(); return; }
+    if(e.key==='z' || e.key==='Z'){ e.preventDefault(); document.getElementById('reset').click(); return; }
+    if(e.key==='l' || e.key==='L'){ e.preventDefault(); document.getElementById('load').click(); return; }
+    if(e.key==='p' || e.key==='P'){ e.preventDefault(); document.getElementById('applyPreset').click(); return; }
+  }, {capture:true});
+
+  // 顶部按钮
+  document.getElementById('load').addEventListener('click', ()=>{ let data; try{ data=parseInput(inputEl.value); } catch(e){ toast(e.message); return; } const graph=buildResidual(data.n, data.s, data.t, data.edges); const nodes=layoutNodes(data.n); const visEdges=buildVisEdges(graph); current={graph, nodes, visEdges, preview:null, history:[]}; clearLog(); drawAll(); toast('图已加载'); log(`n=${data.n}, m=${data.m}, s=${data.s+1}, t=${data.t+1}`); setPreview(null); });
+  document.getElementById('reset').addEventListener('click', ()=>{ if(!current){ toast('请先加载图'); return; } const base=current.graph.orig.map(e=>({u:e.u,v:e.v,cap:e.cap0,cost:e.cost,id:e.id})); const g2=buildResidual(current.graph.n, current.graph.s, current.graph.t, base); current.graph=g2; current.history=[]; setPreview(null); refreshLabels(); clearLog(); toast('已重置'); });
+  document.getElementById('confirm').addEventListener('click', ()=>{ if(!current||!current.preview){ toast('先按 F 找最短路'); return; } const ret=dijkstra(current.graph); if(!ret){ toast('不可达'); setPreview(null); return; } const {path,bottleneck,realDist}=ret; const {costInc}=applyAugment(current.graph, path, bottleneck, realDist); const steps=buildStepsFromPath(path); current.history.push({steps,bottleneck,costInc}); setPreview(null); refreshLabels(); log(`确认增广：路径 ${steps.map(s=>`${s.u+1}→${s.v+1}`).join(' , ')} ，Δ=${bottleneck} ，增量费用=${costInc} ；累计 flow=${current.graph.maxf}，cost=${current.graph.minc}`); highlightPath(steps, steps.length); setTimeout(()=>gOverlay.selectAll('*').remove(), 700); });
+  document.getElementById('cancel').addEventListener('click', ()=>{ setPreview(null); });
+  document.getElementById('run').addEventListener('click', async ()=>{ if(!current){ toast('请先加载图'); return; } setPreview(null); let guard=0; while(true){ const ret=dijkstra(current.graph); if(!ret){ log('不可达：算法结束'); toast('完成'); break; } const {path,bottleneck,realDist}=ret; const {costInc}=applyAugment(current.graph, path, bottleneck, realDist); const steps=buildStepsFromPath(path); current.history.push({steps,bottleneck,costInc}); highlightPath(steps, steps.length); refreshLabels(); log(`增广：路径 ${steps.map(s=>`${s.u+1}→${s.v+1}`).join(' , ')} ，Δ=${bottleneck} ，增量费用=${costInc} ；累计 flow=${current.graph.maxf}，cost=${current.graph.minc}`); await new Promise(r=>setTimeout(r, 360)); if(++guard>2000){ log('保护性中断（轮次过多）'); break; } }
+  });
+
+  // 初始自动加载一次
+  document.getElementById('load').click();
+  // 初次显示快捷键速查
+  document.getElementById('cheatsheet').hidden = false;
+})();
+</script>
+</body>
+</html>
