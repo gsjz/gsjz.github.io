@@ -151,6 +151,7 @@ nav:
     - git:
       - 技能拾遗/git/规范.md
       - 技能拾遗/git/命令行.md
+      - 技能拾遗/git/win 下修改大小写导致 git 未追踪.md
     - hash:
       - 技能拾遗/hash/md5.md
       - 技能拾遗/hash/sha256.md
