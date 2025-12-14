@@ -157,6 +157,7 @@ nav:
     - linux:
       - 技能拾遗/linux/虚拟机网络代理.md
       - 技能拾遗/linux/apt.md
+      - 技能拾遗/linux/vim.md
     - python:
       - 技能拾遗/python/pip.md
       - 技能拾遗/python/交互模式.md
