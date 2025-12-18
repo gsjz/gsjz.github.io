@@ -134,6 +134,8 @@ nav:
       - 机器学习/SUCS229/lec2.md
       - 机器学习/SUCS229/hw0.md
       - 机器学习/SUCS229/hw1.md
+    - 异常检测:
+      - 机器学习/异常检测/index.md
 
   - 应用与计算数学:
     - 应用与计算数学/index.md
@@ -167,6 +169,7 @@ nav:
       - 技能拾遗/python/系统差异.md
       - 技能拾遗/python/虚拟环境.md
       - 技能拾遗/python/文件读写.md
+      - 技能拾遗/python/pdb.md
 
   - XCPC:
     - XCPC/index.md
