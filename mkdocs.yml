@@ -136,6 +136,8 @@ nav:
       - 机器学习/SUCS229/hw1.md
     - 异常检测:
       - 机器学习/异常检测/index.md
+    - opencv:
+      - 机器学习/opencv/边缘检测.md
 
   - 应用与计算数学:
     - 应用与计算数学/index.md
@@ -170,6 +172,9 @@ nav:
       - 技能拾遗/python/虚拟环境.md
       - 技能拾遗/python/文件读写.md
       - 技能拾遗/python/pdb.md
+    - 文本匹配:
+      - 技能拾遗/文本匹配/正则表达式.md
+      - 技能拾遗/文本匹配/grep.md
 
   - XCPC:
     - XCPC/index.md
@@ -206,3 +211,7 @@ nav:
         - yzl_lec4: XCPC/模板与课件/reveal.js/yzl_lec4.html
         - yzl_lec5: XCPC/模板与课件/reveal.js/yzl_lec5.html
         - yzl_lec6: XCPC/模板与课件/reveal.js/yzl_lec6.html  
+
+  - 其它:
+    - 备忘录:
+      - 其它/备忘录/callout.md
