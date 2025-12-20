@@ -136,8 +136,12 @@ nav:
       - 机器学习/SUCS229/hw1.md
     - 异常检测:
       - 机器学习/异常检测/index.md
+    - tensorflow:
+      - 机器学习/tensorflow/index.md
     - opencv:
       - 机器学习/opencv/边缘检测.md
+    - 基础知识:
+      - 机器学习/基础知识/距离.md
 
   - 应用与计算数学:
     - 应用与计算数学/index.md
