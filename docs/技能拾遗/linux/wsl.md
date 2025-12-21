@@ -99,6 +99,27 @@ code .
 
 随后体验几乎就和 win 下的 vscode 体感一致了。
 
+## ipykernel
 
+疑似和 win 下体验不同的是 ipykernel 包
 
+我们先检查一下
+
+```bash
+python - <<'EOF'
+import sys, platform
+print("executable:", sys.executable)
+print("implementation:", platform.python_implementation())
+EOF
+```
+
+结果 implementation 是 GraalVM。
+
+这种情况就得重装环境了。
+
+```bash
+pip install jupyter notebook ipykernel
+```
+
+然后 reload window 即可。
 
