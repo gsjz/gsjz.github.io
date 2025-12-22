@@ -131,10 +131,33 @@
             margin-bottom: 1.4rem;
         }
 
+        .two-column-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 1rem;
+        }
+
+        .item-main {
+            flex: 1;
+        }
+
+        .item-extra {
+            white-space: nowrap;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+
         @page {
             size: A4;
         }
-
         @media print {
             body {
                 background: #ffffff;
@@ -142,9 +165,9 @@
 
             .cv-page {
                 box-shadow: none;
-                margin: 0;
-                padding: 0;
-                max-width: none;
+                /* margin: 0; */
+                padding: 6mm;
+                /* max-width: none; */
                 height:auto;
             }
 
@@ -176,7 +199,7 @@
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <strong>微信：</strong>sergiogao05
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <strong>个人主页：</strong> <a href = "http://note.shujie.cc" target="_blank">note.shujie.cc</a>
+                <strong>个人主页：</strong> <a href="http://note.shujie.cc" target="_blank">note.shujie.cc</a>
             </p>
         </section>
 
@@ -191,7 +214,7 @@
 
         <section class="section">
             <h1>科研 / 项目 / 工作经历</h>
-                <h2>《名字》</h2>
+                <h2>《名字》<em>Name</em> </h2>
                 <div class="row">
                     <span class="chip chip-purple">科研</span>
                     <span class="chip chip-indigo">CCF-Z</span>
@@ -208,45 +231,97 @@
                 </div>
                 <p>介绍</p>
 
-                <h2>公司名字 - 职位</h2>
+                <h2>华为终端 BG 软件部 - AI 软件开发实习生</h2>
                 <div class="row">
                     <span class="chip chip-purple">实习</span>
-                    <span class="chip">摸鱼</span>
-                    <span class="right">（时间）</span>
+                    <span class="chip">杭州？</span>
+                    <span class="right">（拟 2026.01 - 拟 2026.03）</span>
                 </div>
+                <p>孩子们你们觉得主播会被主管面挂或者池子泡不出来吗</p>
         </section>
 
         <section class="section">
             <h1>竞赛 / 证书</h1>
 
-            <h2>算法竞赛与程序设计类</h2>
-            <ul>
-                <li>
-                    ICPC-Regional 国际大学生程序设计竞赛亚洲区域赛
-                    <a style="color: silver;" href = "assets/icpc_gsj.pdf" target="_blank">银奖</a>
-                    （2025.11 上海）
-                </li>
-                <li>
-                    CCF-CSP 计算机软件能力认证
-                    <a style="color: silver;" href = "assets/csp40_gsj.pdf" target="_blank">前 0.39%</a>
-                    （2025.12 待替换成明年的 CCSP？）
-                </li>
-                <li>
-                    PAT-A 攀拓计算机能力测评程序设计甲级 todo（2025.12）
-                </li>
-            </ul>
+            <div class="two-column-section">
+                <section>
+                    <h2>算法竞赛与程序设计类</h2>
+                    <ul>
+                        <li>
+                            <div class="item">
+                                <div class="item-main">
+                                    ICPC-Regional <span style="font-size: 0.8em;">国际大学生程序设计竞赛亚洲区域赛（上海站）</span>
+                                </div>
+                                <div class="item-extra">
+                                    <a style="color: silver;" href="assets/icpc_gsj.pdf" target="_blank">银奖</a>
+                                    <span style="text-align: right">（2025.11）</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item">
+                                <div class="item-main">
+                                    CCF-CSP <span style="font-size: 0.8em;">计算机软件能力认证</span>
+                                </div>
+                                <div class="item-extra">
+                                    <a style="color: silver;" href="assets/csp40_gsj.pdf" target="_blank">前 0.39%</a>
+                                    <span style="text-align: right">（2025.12）</span>
+                                </div>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="item">
+                                <div class="item-main">
+                                    PAT-A <span style="font-size: 0.8em;">攀拓计算机能力测评程序设计甲级</span>
+                                </div>
+                                <div class="item-extra">
+                                    <a style="color: silver;" href="" target="_blank">todo</a>
+                                    <span style="text-align: right">（2025.12）</span>
+                                </div>
+                            </div>
+                        </li>
 
-            <h2>语言类</h2>
-            <ul>
-                <li>
-                    CET-6 大学英语六级考试
-                    <a style="color: brown;" href="assets/CET6_202506_330371251204712_1.pdf" target="_blank">通过</a>
-                    （2025.06）
-                </li>
-            </ul>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>语言类</h2>
+                    <ul>
+                        <li>
+                            <div class="item">
+                                <div class="item-main">
+                                    CET-6 <span style="font-size: 0.8em;">大学英语六级考试</span>
+                                </div>
+                                <div class="item-extra">
+                                    <a style="color: #B87333;" href="assets/CET6_202506_330371251204712_1.pdf"
+                                        　target="_blank">通过</a>
+                                    <span style="text-align: right">（2025.06）</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <h2>类</h2>
+                    <ul>
+                        <li>
+                            <div class="item">
+                                <div class="item-main">
+                                    Eng Abbr. <span style="font-size: 0.8em;">中文全称因为太长了所以字小点</span>
+                                </div>
+                                <div class="item-extra">
+                                    <a style="color: #E6C35C;" href="assets/CET6_202506_330371251204712_1.pdf"
+                                        　target="_blank">成绩</a>
+                                    <span style="text-align: right">（date）</span>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                </section>
+            </div>
+
         </section>
 
-        
+
     </main>
 </body>
 

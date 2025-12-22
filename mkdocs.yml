@@ -177,6 +177,8 @@ nav:
       - 技能拾遗/python/虚拟环境.md
       - 技能拾遗/python/文件读写.md
       - 技能拾遗/python/pdb.md
+    - ssh:
+      - 技能拾遗/ssh/从本地往远程传文件.md
     - 文本匹配:
       - 技能拾遗/文本匹配/正则表达式.md
       - 技能拾遗/文本匹配/grep.md
