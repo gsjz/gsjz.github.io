@@ -1,0 +1,164 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>高书捷·自我介绍</title>
+  <link rel="icon" href="https://cdn.shujie.cc/reveal/favicon.ico">
+  <link rel="stylesheet" href="https://cdn.shujie.cc/reveal/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.shujie.cc/reveal/dist/theme/white.css">
+  <link rel="stylesheet" href="https://cdn.shujie.cc/reveal/plugin/highlight/zenburn.css">
+  <link rel="stylesheet" href="https://cdn.shujie.cc/jbmono/setting.css">
+  <link rel="stylesheet" href="https://cdn.shujie.cc/notoserif/setting.css">
+  <link rel="stylesheet" href="https://cdn.shujie.cc/reveal/src/mysetting.css">
+
+  <style>
+    .stack {
+      position: relative;
+      width: 320px;
+      height: 320px;
+    }
+
+    .page {
+      position: absolute;
+      width: 100%;
+      height: auto;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .page.top {
+      transform: translate(0px, 90px);
+      z-index: 4;
+    }
+
+    .page.p2 {
+      transform: translate(30px, 60px);
+      z-index: 3;
+      opacity: 0.65;
+    }
+
+    .page.p3 {
+      transform: translate(60px, 30px);
+      z-index: 2;
+      opacity: 0.45;
+    }
+
+    .page.p4 {
+      transform: translate(90px, 0px);
+      z-index: 1;
+      opacity: 0.25;
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <img src="assets/证件照.jpg" alt="证件照" style="float: right; width: 230px; padding: 0px; background-color:white;">
+        <p>
+          <strong>姓名：</strong>高书捷
+        </p>
+        <p>
+          <strong>个人主页：</strong><a href="http://note.shujie.cc" target="_blank">note.shujie.cc</a>
+        </p>
+        <p>
+          <strong>本科院校：</strong><img src="assets/icon/hdu.svg" height="40em" style="vertical-align: -0.6em" /> 杭州电子科技大学
+        </p>
+        <p>
+          <strong>本科专业：</strong>计算机科学与技术
+        </p>
+      </section>
+
+      <section>
+        <div id="inline-demo">
+          <div class="row">
+            <div class="item" style="display:flex; flex-direction:column; gap:0px;">
+              <div class="stack">
+                <img src="https://pic.shujie.cc/20251231153715215.jpg" class="page top" alt="page 1">
+                <img src="https://pic.shujie.cc/20251231153706311.jpg" class="page p2" alt="page 2">
+                <img src="https://pic.shujie.cc/20251231153656119.jpg" class="page p3" alt="page 3">
+                <img src="https://pic.shujie.cc/20251231153636489.jpg" class="page p4" alt="page 4">
+              </div>
+
+              <div class="stack">
+                <img src="https://pic.shujie.cc/20251231155645682.png" class="page top" alt="page 1"
+                  style="opacity:0.85">
+                <img src="https://pic.shujie.cc/20251231155601244.png" class="page p2" alt="page 2">
+                <img src="https://pic.shujie.cc/20251231160219262.png" class="page p3" alt="page 3">
+                <img src="https://pic.shujie.cc/20251231155719121.png" class="page p4" alt="page 4">
+              </div>
+            </div>
+
+            <div class="item">
+              <div style="padding-top: 80px">
+                <div class="stack" style="height: 640px;">
+                  <img src="https://pic.shujie.cc/20251231161841408.jpg" class="page top" alt="page 1"
+                    style="opacity:0.65">
+                  <img src="https://pic.shujie.cc/20251231161849132.jpg" class="page p2" alt="page 2">
+                  <img src="https://pic.shujie.cc/20251231161904565.jpg" class="page p3" alt="page 3">
+                  <img src="https://pic.shujie.cc/20251231161910259.jpg" class="page p4" alt="page 4">
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <style>
+            #inline-demo .row {
+              display: flex;
+              gap: 200px;
+              align-items: center;
+            }
+          </style>
+        </div>
+
+      </section>
+    </div>
+  </div>
+  <!-- 用户文件截止 -->
+
+
+
+
+
+
+
+
+
+  <!-- 主库 -->
+  <script src="https://cdn.shujie.cc/reveal/dist/reveal.js"></script>
+
+  <!-- 插件 -->
+  <script src="https://cdn.shujie.cc/reveal/plugin/markdown/markdown.js"></script>
+  <script src="https://cdn.shujie.cc/reveal/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.shujie.cc/reveal/plugin/notes/notes.js"></script>
+  <script src="https://cdn.shujie.cc/reveal/plugin/zoom/zoom.js"></script>
+  <script src="https://cdn.shujie.cc/reveal/plugin/search/search.js"></script>
+  <script src="https://cdn.shujie.cc/reveal/plugin/math/math.js"></script>
+  <script src="https://cdn.shujie.cc/reveal/plugin/reveald3.js"></script>
+
+  <!-- 初始化 -->
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: true,
+      controls: true,
+      progress: true,
+      center: true,
+      plugins: [
+        RevealMarkdown,
+        RevealHighlight,
+        RevealNotes,
+        RevealZoom,
+        RevealSearch,
+        RevealMath,
+        Reveald3,
+      ]
+    });
+  </script>
+</body>
+
+</html>

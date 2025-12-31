@@ -124,6 +124,8 @@ nav:
       - 408考研/政治/思想道德期末.md
     - 面试:
       - 408考研/面试/华为寒假实习.md
+      # - 自我介绍 slide: self-intro.html?print-pdf
+      # - 个人简历: cv.html
 
   - 机器学习:
     - 机器学习/index.md
