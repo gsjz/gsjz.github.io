@@ -1,0 +1,23 @@
+\subsection{四边形不等式优化 DP}
+
+\subsubsection{队列版}
+
+\href{https://loj.ac/p/2157}{2157. 「POI2011 R1」避雷针 Lightning Conductor - 题目 - LibreOJ}
+
+这个情景是，下标决策点未必是要小于当前点的。
+这种问题只需要正向跑一边，逆向跑一边，在两者之间取更优即可。
+模板是解决前面标准的
+\begin{itemize}
+    \item 四边形不等式指 相交 $\le$ 包含
+    \item 等价于要决策的是最小值
+\end{itemize}
+
+注意中途运算时 sqrt 相关操作不能取整，反之则会破坏 $-\sqrt{x}$ 的下凸性（比如说相邻两项点值一样斜率就直接为 0 了）。
+
+\lstinputlisting{Convex_Optimization/monge/monge_dp.cpp}
+
+\subsubsection{分治版}
+
+这里有一个神秘的类似莫队的暴力移动方式，然后复杂度是对的
+
+\lstinputlisting{Convex_Optimization/monge/monge_dp2.cpp}

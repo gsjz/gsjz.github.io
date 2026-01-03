@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dyck 路径绘制（带刻度和网格）</title>
+  <script src="js/d3.v7.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; margin:0; display:flex; flex-direction:column; align-items:center; }
+    #controls { margin-bottom:15px; display:flex; justify-content:center; align-items:center; gap:10px; }
+    input[type="text"] { font-size:16px; padding:5px; width:220px; }
+    button { font-size:16px; padding:5px 12px; cursor:pointer; }
+    #error { color:red; min-width:120px; font-weight:bold; }
+    svg { border:1px solid #ccc; background-color:#fdfdfd; display:block; margin:0 auto; }
+
+    /* 网格线样式：直接应用于 line.grid */
+    line.grid { stroke: #ddd; stroke-width: 1; }
+
+    .yzero-line { stroke: green; stroke-width: 2; }
+    .yminus1-line { stroke: red; stroke-dasharray: 6 4; stroke-width: 2; }
+    .shift-path { stroke: crimson; stroke-dasharray: 5 5; stroke-width: 2; fill: none; }
+    path.main { stroke: steelblue; stroke-width: 2; fill: none; }
+    circle.pt { fill: orange; }
+    .axis path, .axis line { stroke: #333; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <input type="text" id="pathInput" value="UUDDUDUD" aria-label="Dyck路径输入" />
+    <button onclick="draw()">绘制</button>
+    <span id="error"></span>
+  </div>
+  <svg id="chart" width="500" height="500" aria-label="Dyck路径可视化图"></svg>
+
+  <script>
+    function draw() {
+      const input = document.getElementById('pathInput').value.trim().toUpperCase();
+      const errorEl = document.getElementById('error'); errorEl.textContent = '';
+      const svg = d3.select('#chart'); svg.selectAll('*').remove();
+
+      const width = +svg.attr('width'), height = +svg.attr('height'), margin = 50;
+      const xDomain = [0,12], yDomain=[-6,6];
+      const xScale = d3.scaleLinear().domain(xDomain).range([margin, width-margin]);
+      const yScale = d3.scaleLinear().domain(yDomain).range([height-margin, margin]);
+
+      // 绘制网格线
+      const xTicks = d3.range(xDomain[0], xDomain[1]+1);
+      const yTicks = d3.range(yDomain[0], yDomain[1]+1);
+      xTicks.forEach(x=>{
+        svg.append('line')
+          .attr('class','grid')
+          .attr('x1',xScale(x)).attr('y1',yScale(yDomain[0]))
+          .attr('x2',xScale(x)).attr('y2',yScale(yDomain[1]));
+      });
+      yTicks.forEach(y=>{
+        svg.append('line')
+          .attr('class','grid')
+          .attr('x1',xScale(xDomain[0])).attr('y1',yScale(y))
+          .attr('x2',xScale(xDomain[1])).attr('y2',yScale(y));
+      });
+
+      // 坐标轴
+      const xAxis = d3.axisBottom(xScale).ticks(xDomain[1]-xDomain[0]+1).tickFormat(d3.format('d'));
+      const yAxis = d3.axisLeft(yScale).ticks(yDomain[1]-yDomain[0]+1).tickFormat(d3.format('d'));
+      svg.append('g').attr('class','axis')
+        .attr('transform',`translate(0,${height-margin})`).call(xAxis);
+      svg.append('g').attr('class','axis')
+        .attr('transform',`translate(${margin},0)`).call(yAxis);
+
+      // y=0 辅助线
+      svg.append('line')
+        .attr('class','yzero-line')
+        .attr('x1',xScale(xDomain[0])).attr('y1',yScale(0))
+        .attr('x2',xScale(xDomain[1])).attr('y2',yScale(0));
+
+      // 检测合法性
+      let bal=0, isValid=true;
+      for(const c of input){
+        if(c!=='U'&&c!=='D'){ errorEl.textContent='只允许 U 和 D'; return; }
+        bal+=(c==='U'?1:-1);
+        if(bal<0) isValid=false;
+      }
+      if(bal!==0) isValid=false;
+      if(!isValid){
+        svg.append('line')
+          .attr('class','yminus1-line')
+          .attr('x1',xScale(xDomain[0])).attr('y1',yScale(-1))
+          .attr('x2',xScale(xDomain[1])).attr('y2',yScale(-1));
+      }
+
+      // 生成路径点
+      const points=[{x:0,y:0}]; let yval=0;
+      input.split('').forEach((c,i)=>{ yval+=(c==='U'?1:-1); points.push({x:i+1,y:yval}); });
+
+      // 主路径
+      const lineGen = d3.line().x(d=>xScale(d.x)).y(d=>yScale(d.y));
+      svg.append('path')
+        .datum(points.filter(p=>p.x<=xDomain[1]))
+        .attr('class','main')
+        .attr('d',lineGen);
+      svg.selectAll('circle.pt')
+        .data(points.filter(p=>p.x<=xDomain[1]))
+        .enter().append('circle')
+        .attr('class','pt')
+        .attr('cx',d=>xScale(d.x))
+        .attr('cy',d=>yScale(d.y))
+        .attr('r',4);
+
+      // 找首对匹配 U-D
+      let depth=0, start=-1, end=-1;
+      for(let i=0;i<input.length;i++){
+        if(input[i]==='U'){ if(depth===0) start=i; depth++; }
+        else{ depth--; if(depth===0){ end=i; break;} }
+      }
+      // 完整内段向下平移
+      if(isValid && start!==-1 && end>start){
+        const inner = points.slice(start+1, end+1);
+        const shifted = inner.map(p=>({x:p.x,y:p.y-1}));
+        svg.append('path')
+          .datum(shifted.filter(p=>p.x<=xDomain[1]))
+          .attr('class','shift-path')
+          .attr('d',lineGen);
+      }
+    }
+    draw();
+  </script>
+</body>
+</html>

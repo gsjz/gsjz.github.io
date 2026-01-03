@@ -1,0 +1,73 @@
+/* 通用小标签样式 */
+.md-typeset .chip,
+.md-typeset [class^="chip-"],
+.md-typeset [class*=" chip-"] {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.6em;
+  margin: 0 0.4em 0.25em 0;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  line-height: 1.8;
+  background: var(--md-accent-fg-color--transparent);
+  color: var(--md-accent-fg-color);
+}
+
+.md-typeset .chip-blue {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+/* 绿色 */
+.md-typeset .chip-green {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* 橙色 / 提示 */
+.md-typeset .chip-orange {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+/* 紫色 */
+.md-typeset .chip-purple {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+/* 灰色：一般/中性 */
+.md-typeset .chip-gray {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* 黄色：进行中 / 想法 */
+.md-typeset .chip-yellow {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* 青色：数据 / 网络 / Infra */
+.md-typeset .chip-teal {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+
+/* 粉色：个人 / 软技能 / 兴趣 */
+.md-typeset .chip-pink {
+  background: #ffe4e6;
+  color: #be123c;
+}
+
+/* 靛蓝：学术 / 理论 / 算法 */
+.md-typeset .chip-indigo {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* 棕色：偏「硬件 / 底层 / 系统」那种感觉 */
+.md-typeset .chip-brown {
+  background: #ede0d4;
+  color: #7b341e;
+}

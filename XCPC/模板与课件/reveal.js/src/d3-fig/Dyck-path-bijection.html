@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dyck路径绘制 + 对称线开关</title>
+  <script src="js/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+
+    /* 三部分对称布局 */
+    #controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .side {
+      width: 220px; /* 左右两侧固定相同宽度 */
+      display: flex;
+      align-items: center;
+    }
+
+    .left {
+      justify-content: flex-end; /* 左侧内容靠右 */
+    }
+
+    .right {
+      justify-content: flex-start; /* 右侧内容靠左 */
+    }
+
+    .center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    input[type="text"] {
+      font-size: 16px;
+      padding: 5px;
+      width: 200px;
+    }
+
+    button {
+      font-size: 16px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+
+    #mirrorToggle {
+      display: none; /* 默认隐藏 */
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #error {
+      color: red;
+      font-weight: bold;
+      text-align: center;
+      min-height: 1em;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    svg {
+      border: 1px solid #ccc;
+      background-color: #fdfdfd;
+      display: block;
+      margin: 0 auto;
+    }
+    .grid line { stroke-opacity: 0.1; }
+    .mirror-path {
+      stroke: crimson;
+      stroke-dasharray: 5 5;
+      stroke-width: 2;
+      fill: none;
+    }
+    .yminus1-line {
+      stroke: red;
+      stroke-dasharray: 6 4;
+      stroke-width: 2;
+    }
+    .yzero-line {
+      stroke: green;
+      stroke-width: 2;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="controls">
+    <div class="side left">
+      <input type="text" id="dyckInput" value="UUDDDU" aria-label="Dyck路径输入">
+    </div>
+
+    <div class="center">
+      <button id="drawBtn" onclick="drawDyck()">绘制</button>
+    </div>
+
+    <div class="side right">
+      <label id="mirrorToggle">
+        <input type="checkbox" id="mirrorCheckbox">
+        显示对称辅助线
+      </label>
+    </div>
+  </div>
+
+  <span id="error"></span>
+
+  <svg width="500" height="500" id="dyckSVG" aria-label="Dyck路径可视化图"></svg>
+
+  <script>
+    // 缓存状态
+    let lastPoints = [];
+    let lastFirstBelow = -1;
+
+    function drawDyck() {
+      const input = document.getElementById('dyckInput').value.trim().toUpperCase();
+      const error = document.getElementById('error');
+      const svg = d3.select('#dyckSVG');
+      svg.selectAll('*').remove();
+
+      const points = [];
+      let x = 0, y = 0, firstBelow = -1;
+      points.push([x, y]);
+
+      for (let i = 0; i < input.length; i++) {
+        const step = input[i];
+        x += 1;
+        if (step === 'U') y += 1;
+        else if (step === 'D') y -= 1;
+        else {
+          error.textContent = '只允许 U 和 D';
+          return;
+        }
+        if (firstBelow === -1 && y < 0) firstBelow = i + 1;
+        points.push([x, y]);
+      }
+      error.textContent = '';
+
+      // 保存状态
+      lastPoints = points;
+      lastFirstBelow = firstBelow;
+
+      const width = 500, height = 500, margin = 50;
+      const xDomain = [0, 12], yDomain = [-6, 6];
+
+      const xScale = d3.scaleLinear().domain(xDomain).range([margin, width - margin]);
+      const yScale = d3.scaleLinear().domain(yDomain).range([height - margin, margin]);
+
+      const xAxis = d3.axisBottom(xScale).ticks(xDomain[1] - xDomain[0] + 1).tickFormat(d3.format('d'));
+      const yAxis = d3.axisLeft(yScale).ticks(yDomain[1] - yDomain[0] + 1).tickFormat(d3.format('d'));
+      const xGrid = d3.axisBottom(xScale).ticks(xDomain[1] - xDomain[0] + 1).tickSize(-height + 2 * margin).tickFormat('');
+      const yGrid = d3.axisLeft(yScale).ticks(yDomain[1] - yDomain[0] + 1).tickSize(-width + 2 * margin).tickFormat('');
+
+      // 绘制网格和坐标轴
+      svg.append('g').attr('transform', `translate(0,${height - margin})`).call(xGrid).attr('class', 'grid');
+      svg.append('g').attr('transform', `translate(${margin},0)`).call(yGrid).attr('class', 'grid');
+      svg.append('g').attr('transform', `translate(0,${height - margin})`).call(xAxis);
+      svg.append('g').attr('transform', `translate(${margin},0)`).call(yAxis);
+
+      // 生成并绘制路径
+      const line = d3.line().x(d => xScale(d[0])).y(d => yScale(d[1]));
+      const clipped = points.filter(p => p[0] <= xDomain[1]);
+
+      svg.append('path').datum(clipped)
+        .attr('d', line).attr('stroke', 'steelblue').attr('stroke-width', 2).attr('fill', 'none');
+
+      svg.selectAll('circle').data(clipped).enter().append('circle')
+        .attr('cx', d => xScale(d[0])).attr('cy', d => yScale(d[1])).attr('r', 4).attr('fill', 'orange');
+
+      // y=0 线
+      svg.append('line').attr('class', 'yzero-line')
+        .attr('x1', xScale(xDomain[0])).attr('y1', yScale(0))
+        .attr('x2', xScale(xDomain[1])).attr('y2', yScale(0));
+
+      // y=-1 线
+      if (firstBelow !== -1) {
+        svg.append('line').attr('class', 'yminus1-line')
+          .attr('x1', xScale(xDomain[0])).attr('y1', yScale(-1))
+          .attr('x2', xScale(xDomain[1])).attr('y2', yScale(-1));
+      }
+
+      // 显示对称开关
+      const toggle = document.getElementById('mirrorToggle');
+      toggle.style.display = firstBelow === -1 ? 'none' : 'inline-flex';
+
+      // 绘制对称路径
+      if (firstBelow !== -1 && document.getElementById('mirrorCheckbox').checked) {
+        const reflectY = -1;
+        const mirrorPts = points.slice(0, firstBelow + 1).map(([x,y]) => [x, 2*reflectY - y]);
+        svg.append('path').datum(mirrorPts)
+          .attr('class', 'mirror-path').attr('d', line);
+      }
+    }
+
+    document.getElementById('mirrorCheckbox').addEventListener('change', () => { if (lastPoints.length && lastFirstBelow !== -1) drawDyck(); });
+    window.onload = drawDyck;
+  </script>
+</body>
+</html>

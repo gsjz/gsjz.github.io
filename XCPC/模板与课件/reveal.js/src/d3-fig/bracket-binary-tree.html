@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>括号序列到二叉树可视化</title>
+  <script src="js/d3.v7.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align:center; margin:20px; }
+    input, button { font-size:16px; margin:5px; }
+    svg { border:1px solid #ccc; background:white; }
+    .link { stroke-width:2; fill:none; }
+    .node circle { stroke:black; stroke-width:1.5px; }
+    .node text { font-size:12px; dominant-baseline:middle; text-anchor:middle; }
+  </style>
+</head>
+<body>
+  <h1>括号序列 → 二叉树</h1>
+  <input id="bracket-input" value="(())()" placeholder="输入合法括号序列" />
+  <button onclick="visualize()">生成树</button>
+  <br/>
+  <svg width="800" height="400"></svg>
+
+  <script>
+  function visualize(){
+    const seq = document.getElementById('bracket-input').value.trim();
+    if(!/^[()]+$/.test(seq)||!isValid(seq)){
+      return alert('请输入合法括号序列');
+    }
+    const tree = generateTreeData(seq);
+    renderTree(tree);
+  }
+  function isValid(s){
+    let b=0;
+    for(let c of s){
+      b+=c==='(' ? 1 : -1;
+      if(b<0) return false;
+    }
+    return b===0;
+  }
+
+  // 解析括号 -> 二叉树，打 _isLeft
+  function generateTreeData(seq){
+    let i=0;
+    function parse(){
+      if(i>=seq.length||seq[i]!=='(') return null;
+      i++;
+      const node={ name:'', children:[] };
+      const L=parse();
+      if(L){ L._isLeft=true; node.children.push(L); }
+      if(seq[i]===')') i++;
+      const R=parse();
+      if(R){ R._isLeft=false; node.children.push(R); }
+      if(node.children.length===0) delete node.children;
+      return node;
+    }
+    const root=parse();
+    let cnt=0;
+    (function nameIt(n){
+      if(!n) return;
+      n.name=`N${cnt++}`;
+      if(n.children) n.children.forEach(nameIt);
+    })(root);
+    return root;
+  }
+
+  // 自定义 layout：水平中心 + 左右偏移，垂直 = depth*dy
+  function renderTree(data){
+    const svg = d3.select('svg');
+    svg.selectAll('*').remove();
+    const W=+svg.attr('width'), H=+svg.attr('height');
+    const cx = W/2, dy = 60, dx = 60, top=40;
+
+    // collect nodes via BFS
+    const nodes=[], links=[];
+    (function dfs(n, depth, parent){
+      if(!n) return;
+      // compute coords
+      const x = (n._isLeft===true ? -dx*depth
+                 : n._isLeft===false ? dx*depth
+                 : 0);
+      n._px = cx + x;
+      n._py = top + depth*dy;
+      nodes.push(n);
+      if(parent){
+        links.push({ source:parent, target:n });
+      }
+      if(n.children){
+        dfs(n.children[0], depth+1, n);
+        dfs(n.children[1], depth+1, n);
+      }
+    })(data, 0, null);
+
+    // draw links
+    svg.selectAll('path.link')
+      .data(links)
+      .enter().append('path')
+        .attr('class','link')
+        .attr('stroke', d=> d.target._isLeft ? '#1f77b4' : '#ff7f0e')
+        .attr('d', d => {
+          const s = d.source, t = d.target;
+          return `M${s._px},${s._py} L${t._px},${t._py}`;
+        });
+
+    // draw nodes
+    const g = svg.selectAll('g.node')
+      .data(nodes)
+      .enter().append('g')
+        .attr('class','node')
+        .attr('transform', d=>`translate(${d._px},${d._py})`);
+
+    g.append('circle')
+      .attr('r', 8)
+      .attr('fill', d=> d._isLeft===undefined ? 'white' 
+                       : d._isLeft ? '#1f77b4' : '#ff7f0e');
+
+    g.append('text')
+      .attr('dy', -12)
+      .text(d=>d.name);
+  }
+
+  window.onload = visualize();
+  </script>
+</body>
+</html>
